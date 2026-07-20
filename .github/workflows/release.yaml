@@ -1,0 +1,16 @@
+name: Release
+
+on:
+    release:
+        types: [created]
+
+permissions:
+    contents: read
+    id-token: write
+
+jobs:
+    release:
+        uses: jterrazz/jterrazz-actions/.github/workflows/release-npm.yaml@main
+        with:
+            node-version: '24'
+        secrets: inherit
