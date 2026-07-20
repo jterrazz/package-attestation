@@ -14,12 +14,12 @@ An attestation proves an article existed, unmodified, at a point in time, signed
 
 ## Pick the right entry
 
-| Task | Entry |
-| --- | --- |
-| Sign, serialize, audit, full verify | `@jterrazz/attestation` (Node) |
-| Verify in a page/component | `@jterrazz/attestation/browser` — pure ESM, no Node imports; `verifyFromUrl` does the whole dance from public URLs |
-| Stamp/upgrade/verify the Bitcoin proof | `@jterrazz/attestation/node` (`stampDigest`, `upgradeProof`, `verifyOts`) |
-| One-off operations | `npx attestation sign|verify|upgrade` |
+| Task                                   | Entry                                                                                                              |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Sign, serialize, audit, full verify    | `@jterrazz/attestation` (Node)                                                                                     |
+| Verify in a page/component             | `@jterrazz/attestation/browser` — pure ESM, no Node imports; `verifyFromUrl` does the whole dance from public URLs |
+| Stamp/upgrade/verify the Bitcoin proof | `@jterrazz/attestation/node` (`stampDigest`, `upgradeProof`, `verifyOts`)                                          |
+| One-off operations                     | `npx attestation sign                                                                                              | verify | upgrade` |
 
 ## Invariants (do not fight them)
 
