@@ -7,6 +7,7 @@ export { stampDigest, upgradeProof } from './ots/stamp.js';
 export {
     type OtsVerifyFail,
     type OtsVerifyOk,
+    type OtsVerifyOptions,
     type OtsVerifyResult,
     verifyOts,
 } from './ots/verify.js';
