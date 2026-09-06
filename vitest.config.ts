@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config';
+import { defineSpecConfig } from '@jterrazz/test/vitest';
 
-export default defineConfig({
+export default defineSpecConfig({
     test: {
         projects: [
             {
