@@ -22,4 +22,4 @@ test-network: node_modules/.install
 	npm run test:network
 
 clean:
-	rm -rf dist node_modules
+	rm -rf .artifacts dist

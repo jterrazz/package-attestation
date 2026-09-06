@@ -20,3 +20,4 @@ skills/             # jterrazz-attestation — wiring + domain skill
 - Offline by default: `npm test` never touches the network; calendar interactions live behind `test:network` (`ATTEST_E2E_NETWORK=1`).
 - `.npmrc` sets `allow-git=all` deliberately (javascript-opentimestamps pins a git ref) — do not remove.
 - Module unit tests are siblings; `make build lint test` must stay green.
+- Everything a tool writes lands under `.artifacts/<tool>/`, and `make clean` takes that directory away; `dist/` is the published product, not an artefact. The convention and its gate are `@jterrazz/typescript`'s.
