@@ -1,4 +1,8 @@
 {
     "$schema": "https://unpkg.com/knip@5/schema.json",
-    "ignoreBinaries": ["tsdown", "codestyle", "vitest"]
+    "ignoreBinaries": ["tsdown", "codestyle", "vitest"],
+    // oxlint.config.ts and oxfmt.config.ts import `defineConfig` straight from
+    // those packages, which this project never declares itself — both ship
+    // transitively as @jterrazz/typescript's own dependencies.
+    "ignoreDependencies": ["oxlint", "oxfmt"]
 }
