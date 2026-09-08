@@ -24,4 +24,16 @@ Cryptographic attestation for articles — an EIP-712 signature over the canonic
 
 Reference consumer: [`jterrazz-web`](https://github.com/jterrazz/jterrazz-web) (verify page, proof card, signing scripts).
 
+## Documentation
+
+The full corpus lives in [`docs/`](docs/):
+
+- [Architecture](docs/01-architecture.md) — the four entries, the layers, the browser boundary.
+- [Developing](docs/02-developing.md) — the toolchain and where a new file goes.
+- [Testing](docs/03-testing.md) — the five test projects and what a golden pins.
+- [Operating](docs/04-operating.md) — what publishes it, and which number moves.
+- [Signing and anchoring](docs/05-signing-and-anchoring.md) — canonicalization, EIP-712, the digest chain, Bitcoin anchoring.
+
+For agents: read the chapters straight from the repo, plus the [`skills/jterrazz-attestation`](skills/jterrazz-attestation/SKILL.md) Claude Code skill.
+
 MIT © [Jean-Baptiste Terrazzoni](https://github.com/jterrazz)
