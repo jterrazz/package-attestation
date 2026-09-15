@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 
-import { canonicalize } from '../../src/core/canonicalize.js';
+import { canonicalize } from '../../src/primitives/canonicalize.js';
 
 /**
  * Frozen byte-and-digest goldens for canonicalize() v1.

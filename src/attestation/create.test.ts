@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { TEST_ADDRESS, testAccount } from '../../tests/setup/test-wallet.js';
-import { NO_PRIOR_ATTESTATION } from '../core/eip712-schema.js';
+import { NO_PRIOR_ATTESTATION } from '../primitives/eip712-schema.js';
 import { SCHEMA_VERSION } from '../index.js';
 import { buildAttestationMessage, createAttestation, signAttestation } from './create.js';
 

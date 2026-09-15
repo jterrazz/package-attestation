@@ -4,7 +4,7 @@ What an attestation actually proves, in order: the content is exactly what was c
 
 ## 1. Canonicalize
 
-`canonicalize()` (`src/core/canonicalize.ts`) turns an article body into a fixed byte sequence before anything is hashed or signed, so two authors' editors never produce two different signatures for the same words. The rules, in order, are a FROZEN v1 contract:
+`canonicalize()` (`src/primitives/canonicalize.ts`) turns an article body into a fixed byte sequence before anything is hashed or signed, so two authors' editors never produce two different signatures for the same words. The rules, in order, are a FROZEN v1 contract:
 
 1. Reject unpaired UTF-16 surrogates (corrupt input) — throws `InvalidContentError`.
 2. Strip a leading BOM (U+FEFF).
@@ -15,11 +15,11 @@ What an attestation actually proves, in order: the content is exactly what was c
 
 No markdown parsing, no per-line trim, no tab-to-space substitution, no interior whitespace collapsing — each would silently change a published article's meaning. `CANONICAL_VERSION` (`src/version.ts`) is embedded in every attestation so a future verifier can dispatch on it; changing a rule above means shipping v1 alongside a new v2, never editing v1 in place. The exact bytes each rule produces for a fixed set of inputs are pinned by the goldens in [03-testing.md](03-testing.md).
 
-`audit()` (`src/core/audit.ts`) runs only at sign time, over the canonical bytes, and flags invisible/directional Unicode characters (zero-width space, RTL overrides, and the like) that an author probably did not mean to publish. It is advice, not a rule a verifier applies — `verifyAttestation` never sees it.
+`audit()` (`src/primitives/audit.ts`) runs only at sign time, over the canonical bytes, and flags invisible/directional Unicode characters (zero-width space, RTL overrides, and the like) that an author probably did not mean to publish. It is advice, not a rule a verifier applies — `verifyAttestation` never sees it.
 
 ## 2. Build and sign
 
-`buildAttestationMessage()` (`src/attestation/create.ts`) canonicalizes the content, SHA-256-hashes it (`sha256Hex`), and assembles the EIP-712 typed message (`src/core/eip712-schema.ts`):
+`buildAttestationMessage()` (`src/attestation/create.ts`) canonicalizes the content, SHA-256-hashes it (`sha256Hex`), and assembles the EIP-712 typed message (`src/primitives/eip712-schema.ts`):
 
 | Field                     | Meaning                                                                                                                                |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,7 +1,7 @@
 export { CANONICAL_VERSION, SCHEMA_VERSION } from './version.js';
 
-export { audit, type AuditFinding } from './core/audit.js';
-export { canonicalize, InvalidContentError } from './core/canonicalize.js';
+export { audit, type AuditFinding } from './primitives/audit.js';
+export { canonicalize, InvalidContentError } from './primitives/canonicalize.js';
 export {
     type ArticleClaims,
     type ArticleSubject,
@@ -10,7 +10,7 @@ export {
     ATTESTATION_TYPES_V1,
     type AttestationMessage,
     NO_PRIOR_ATTESTATION,
-} from './core/eip712-schema.js';
+} from './primitives/eip712-schema.js';
 
 export {
     buildAttestationMessage,

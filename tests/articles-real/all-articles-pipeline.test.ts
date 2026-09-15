@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { createAttestation } from '../../src/attestation/create.js';
 import { stringify } from '../../src/attestation/serialize.js';
 import { verifyAttestation } from '../../src/attestation/verify.js';
-import { audit } from '../../src/core/audit.js';
-import { canonicalize } from '../../src/core/canonicalize.js';
+import { audit } from '../../src/primitives/audit.js';
+import { canonicalize } from '../../src/primitives/canonicalize.js';
 import { testAccount } from '../setup/test-wallet.js';
 
 /**

@@ -1,12 +1,12 @@
 import { recoverTypedDataAddress } from 'viem';
 
-import { canonicalize } from '../core/canonicalize.js';
+import { canonicalize } from '../primitives/canonicalize.js';
 import {
     ATTESTATION_DOMAIN_V1,
     ATTESTATION_PRIMARY_TYPE,
     ATTESTATION_TYPES_V1,
-} from '../core/eip712-schema.js';
-import { sha256Hex } from '../core/sha256.js';
+} from '../primitives/eip712-schema.js';
+import { sha256Hex } from '../primitives/sha256.js';
 import { SCHEMA_VERSION } from '../version.js';
 import { type SignedAttestation, type VerifyResult } from './types.js';
 

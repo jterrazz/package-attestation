@@ -2,8 +2,8 @@
 // All primitives go through @noble/hashes and viem, both of which run in any
 // Modern JS runtime (browsers, Node, Bun, Deno, Edge).
 
-export { canonicalize, InvalidContentError } from './core/canonicalize.js';
-export { sha256Hex } from './core/sha256.js';
+export { canonicalize, InvalidContentError } from './primitives/canonicalize.js';
+export { sha256Hex } from './primitives/sha256.js';
 export {
     type ArticleClaims,
     type ArticleSubject,
@@ -12,7 +12,7 @@ export {
     ATTESTATION_TYPES_V1,
     type AttestationMessage,
     NO_PRIOR_ATTESTATION,
-} from './core/eip712-schema.js';
+} from './primitives/eip712-schema.js';
 
 export { buildAttestationMessage, type CreateAttestationInput } from './attestation/create.js';
 export { fromStored, parse, stringify, toStored } from './attestation/serialize.js';

@@ -20,7 +20,7 @@ Quality is the `@jterrazz` toolchain: oxlint/oxfmt presets and the quality gate 
 
 A module's home is one of the six folders in [01-architecture.md](01-architecture.md) § Layers, chosen by which entry point needs it — never a shared `utils.ts`. Concretely:
 
-- A pure, runtime-agnostic primitive (hashing, encoding, schema data) goes in `src/core/`.
+- A pure, runtime-agnostic primitive (hashing, encoding, schema data) goes in `src/primitives/`.
 - Anything that builds, signs, verifies or serializes an attestation record goes in `src/attestation/`.
 - Anything that talks to OpenTimestamps goes in `src/ots/` and is exported from `src/node.ts`, never from `src/browser.ts`.
 - Anything the browser entry re-exports goes in `src/browser/`, and the file must not import a Node-only module — see [01-architecture.md](01-architecture.md) § The boundary that IS the export map.
@@ -34,7 +34,7 @@ A module's unit test is its sibling (`create.ts` / `create.test.ts`); a test tha
 - **The frozen contract never moves.** `CANONICAL_VERSION` and `SCHEMA_VERSION` (`src/version.ts`) are each bumped only by adding a new version alongside the old one — never by editing `canonicalize()` or the EIP-712 schema in place. A verifier for the old version must keep working. See [05-signing-and-anchoring.md](05-signing-and-anchoring.md).
 - **`.npmrc` sets `allow-git=all` deliberately** — `javascript-opentimestamps` is pinned to a git ref in `package.json`, and npm refuses a git dependency without it. Do not remove the line.
 - **Offline by default.** `npm test` never touches the network. Anything that calls an OpenTimestamps calendar or a Bitcoin block-info source lives behind the `e2e-network` project, gated by `ATTEST_E2E_NETWORK=1` (`npm run test:network`).
-- **Audit runs at sign time only.** `src/core/audit.ts` is advice for the author signing a file, never a rule `verifyAttestation` applies — a verifier is a pure function of `canonicalize()` alone, and adding a stricter check there would make an old, honestly-signed attestation fail a newer verifier.
+- **Audit runs at sign time only.** `src/primitives/audit.ts` is advice for the author signing a file, never a rule `verifyAttestation` applies — a verifier is a pure function of `canonicalize()` alone, and adding a stricter check there would make an old, honestly-signed attestation fail a newer verifier.
 
 ## Related
 

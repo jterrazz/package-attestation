@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { type AttestationMessage, NO_PRIOR_ATTESTATION } from '../core/eip712-schema.js';
+import { type AttestationMessage, NO_PRIOR_ATTESTATION } from '../primitives/eip712-schema.js';
 import { signViaBrowser } from './sign-flow.js';
 import { buildSignPageHtml } from './sign-page-html.js';
 

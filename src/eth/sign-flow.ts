@@ -6,7 +6,7 @@ import {
     ATTESTATION_PRIMARY_TYPE,
     ATTESTATION_TYPES_V1,
     type AttestationMessage,
-} from '../core/eip712-schema.js';
+} from '../primitives/eip712-schema.js';
 import { buildSignPageHtml } from './sign-page-html.js';
 
 export type SignFlowOptions = {
