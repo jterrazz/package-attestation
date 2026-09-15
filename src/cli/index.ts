@@ -58,13 +58,13 @@ async function dispatchSign(argv: string[]): Promise<number> {
     });
 
     const file = positionals[0];
-    if (!file) {
+    if (file === undefined || file === '') {
         throw new Error('Missing required <file> argument.');
     }
-    if (!values.title) {
+    if (values.title === undefined || values.title === '') {
         throw new Error('Missing required --title.');
     }
-    if (!values.slug) {
+    if (values.slug === undefined || values.slug === '') {
         throw new Error('Missing required --slug.');
     }
 
@@ -73,7 +73,10 @@ async function dispatchSign(argv: string[]): Promise<number> {
         locale: values.locale,
         priorAttestation: values['prior-attestation'] as `0x${string}` | undefined,
         publishedAt: values['published-at'],
-        revision: values.revision ? Number(values.revision) : undefined,
+        revision:
+            values.revision === undefined || values.revision === ''
+                ? undefined
+                : Number(values.revision),
         skipAudit: values['skip-audit'],
         skipStamp: values['skip-stamp'],
         slug: values.slug,
@@ -92,7 +95,7 @@ async function dispatchVerify(argv: string[]): Promise<number> {
     });
 
     const target = positionals[0];
-    if (!target) {
+    if (target === undefined || target === '') {
         throw new Error('Missing required <url|file> argument.');
     }
 

@@ -1,5 +1,3 @@
-import { type TypedData, type TypedDataDomain } from 'viem';
-
 /**
  * EIP-712 typed-data schema for attestation v1 — FROZEN.
  *
@@ -15,7 +13,7 @@ export const ATTESTATION_DOMAIN_V1 = {
     chainId: 1,
     name: 'jterrazz.com Article Attestation',
     version: '1',
-} as const satisfies TypedDataDomain;
+} as const;
 
 export const ATTESTATION_TYPES_V1 = {
     Attestation: [
@@ -34,7 +32,7 @@ export const ATTESTATION_TYPES_V1 = {
         { name: 'contentDigest', type: 'bytes32' },
         { name: 'locale', type: 'string' },
     ],
-} as const satisfies TypedData;
+} as const;
 
 export const ATTESTATION_PRIMARY_TYPE = 'Attestation' as const;
 

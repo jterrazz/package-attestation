@@ -58,7 +58,7 @@ export async function signBatchViaBrowser(
     const signatures = new Map<string, BatchSignature>();
     const skipped = new Map<string, string>();
 
-    return new Promise<BatchSignFlowResult>((resolve, reject) => {
+    return await new Promise<BatchSignFlowResult>((resolve, reject) => {
         const server = createServer((req, res) => {
             if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
                 res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
@@ -88,9 +88,9 @@ export async function signBatchViaBrowser(
                     if (req.url === '/sig') {
                         if (
                             typeof parsed.signature !== 'string' ||
-                            !/^0x[0-9a-fA-F]{130}$/.test(parsed.signature) ||
+                            !/^0x[0-9a-fA-F]{130}$/u.test(parsed.signature) ||
                             typeof parsed.signerAddress !== 'string' ||
-                            !/^0x[0-9a-fA-F]{40}$/.test(parsed.signerAddress)
+                            !/^0x[0-9a-fA-F]{40}$/u.test(parsed.signerAddress)
                         ) {
                             res.writeHead(400);
                             res.end('Invalid payload');
@@ -141,7 +141,7 @@ export async function signBatchViaBrowser(
             void Promise.resolve(ready(url)).catch((error: unknown) => {
                 clearTimeout(timer);
                 server.close();
-                reject(error);
+                reject(error instanceof Error ? error : new Error(String(error)));
             });
         });
     });
@@ -165,7 +165,7 @@ function serializeMessageForBrowser(message: AttestationMessage): Record<string,
     };
 }
 
-function domainTypes(): Array<{ name: string; type: string }> {
+function domainTypes(): { name: string; type: string }[] {
     return [
         { name: 'name', type: 'string' },
         { name: 'version', type: 'string' },

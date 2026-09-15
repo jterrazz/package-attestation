@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { TEST_ADDRESS, testAccount } from '../../tests/setup/test-wallet.js';
 import { createAttestation } from './create.js';
+import { type SignedAttestation } from './types.js';
 import { verifyAttestation } from './verify.js';
 
 const baseInput = {
@@ -13,7 +14,7 @@ const baseInput = {
 };
 
 describe('verifyAttestation — happy path', () => {
-    it('verifies a freshly signed attestation', async () => {
+    test('verifies a freshly signed attestation', async () => {
         const account = testAccount();
         const signed = await createAttestation(baseInput, account);
 
@@ -22,13 +23,13 @@ describe('verifyAttestation — happy path', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBe(true);
+        expect(result.ok).toBeTruthy();
         if (result.ok) {
             expect(result.signerAddress).toBe(TEST_ADDRESS);
         }
     });
 
-    it('still verifies if the verifier passes content with CRLF (canonicalize handles)', async () => {
+    test('still verifies if the verifier passes content with CRLF (canonicalize handles)', async () => {
         const account = testAccount();
         const signed = await createAttestation(baseInput, account);
 
@@ -37,33 +38,34 @@ describe('verifyAttestation — happy path', () => {
             content: '# Hello\r\n\r\nWorld.\r\n',
         });
 
-        expect(result.ok).toBe(true);
+        expect(result.ok).toBeTruthy();
     });
 });
 
 describe('verifyAttestation — rejection paths', () => {
-    it('rejects when content has been mutated by one byte', async () => {
+    test('rejects when content has been mutated by one byte', async () => {
         const account = testAccount();
         const signed = await createAttestation(baseInput, account);
 
         const result = await verifyAttestation({
             attestation: signed,
-            content: '# Hello\n\nWorl.', // Lost the 'd'
+            // Lost the 'd'.
+            content: '# Hello\n\nWorl.',
         });
 
-        expect(result.ok).toBe(false);
+        expect(result.ok).toBeFalsy();
         if (!result.ok) {
             expect(result.error.kind).toBe('content-mismatch');
         }
     });
 
-    it('rejects when the signature is corrupted', async () => {
+    test('rejects when the signature is corrupted', async () => {
         const account = testAccount();
         const signed = await createAttestation(baseInput, account);
 
-        const corrupted = {
+        const corrupted: SignedAttestation = {
             ...signed,
-            signature: `0x${'00'.repeat(65)}` as `0x${string}`,
+            signature: `0x${'00'.repeat(65)}`,
         };
 
         const result = await verifyAttestation({
@@ -71,13 +73,13 @@ describe('verifyAttestation — rejection paths', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBe(false);
+        expect(result.ok).toBeFalsy();
         if (!result.ok) {
             expect(['invalid-signature', 'signer-mismatch']).toContain(result.error.kind);
         }
     });
 
-    it('rejects when the declared signerAddress does not match recovered', async () => {
+    test('rejects when the declared signerAddress does not match recovered', async () => {
         const account = testAccount();
         const signed = await createAttestation(baseInput, account);
 
@@ -91,13 +93,13 @@ describe('verifyAttestation — rejection paths', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBe(false);
+        expect(result.ok).toBeFalsy();
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
         }
     });
 
-    it('rejects when claims have been tampered (swapped slug)', async () => {
+    test('rejects when claims have been tampered (swapped slug)', async () => {
         const account = testAccount();
         const signed = await createAttestation(baseInput, account);
 
@@ -111,13 +113,13 @@ describe('verifyAttestation — rejection paths', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBe(false);
+        expect(result.ok).toBeFalsy();
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
         }
     });
 
-    it('rejects an unsupported schemaVersion', async () => {
+    test('rejects an unsupported schemaVersion', async () => {
         const account = testAccount();
         const signed = await createAttestation(baseInput, account);
 
@@ -128,7 +130,7 @@ describe('verifyAttestation — rejection paths', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBe(false);
+        expect(result.ok).toBeFalsy();
         if (!result.ok) {
             expect(result.error.kind).toBe('schema-version-unsupported');
             if (result.error.kind === 'schema-version-unsupported') {

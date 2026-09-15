@@ -1,18 +1,6 @@
 import OpenTimestamps from 'javascript-opentimestamps';
 
-const { DetachedTimestampFile, Ops } = OpenTimestamps as {
-    DetachedTimestampFile: {
-        deserialize: (bytes: Buffer | Uint8Array) => unknown;
-        fromHash: (op: unknown, hash: Buffer) => unknown;
-    };
-    Ops: { OpSHA256: unknown };
-    stamp: (detached: unknown) => Promise<void>;
-    upgrade: (detached: unknown) => Promise<boolean>;
-    verify: (
-        detached: unknown,
-        original: unknown,
-    ) => Promise<Record<string, { timestamp: number }>>;
-};
+const { DetachedTimestampFile, Ops } = OpenTimestamps;
 
 /**
  * Submit a SHA-256 digest to OpenTimestamps calendars and return the proof bytes.

@@ -18,8 +18,8 @@ export type CreateAttestationInput = {
     slug: string;
     locale: string;
     publishedAt: bigint | Date | number;
-    revision?: number;
-    priorAttestation?: `0x${string}`;
+    revision?: number | undefined;
+    priorAttestation?: `0x${string}` | undefined;
 };
 
 export function buildAttestationMessage(input: CreateAttestationInput): AttestationMessage {
@@ -64,7 +64,7 @@ export async function createAttestation(
     input: CreateAttestationInput,
     account: LocalAccount,
 ): Promise<SignedAttestation> {
-    return signAttestation(buildAttestationMessage(input), account);
+    return await signAttestation(buildAttestationMessage(input), account);
 }
 
 function toUnixSeconds(value: bigint | Date | number): bigint {

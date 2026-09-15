@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { canonicalize } from '../../src/primitives/canonicalize.js';
 
@@ -34,7 +34,7 @@ const fixtures: Fixture[] = [
 const sha256Hex = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
 
 describe('canonicalize golden — v1 frozen outputs', () => {
-    it.each(fixtures)('$name → frozen bytes + digest', ({ input }) => {
+    test.each(fixtures)('$name → frozen bytes + digest', ({ input }) => {
         const bytes = canonicalize(input);
         const utf8 = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
         const digest = sha256Hex(bytes);
@@ -46,10 +46,10 @@ describe('canonicalize golden — v1 frozen outputs', () => {
         }).toMatchSnapshot();
     });
 
-    it('NFC equivalence: decomposed and precomposed produce identical bytes', () => {
+    test('decomposed and precomposed NFC forms produce identical bytes', () => {
         // Two fixtures above represent the same Unicode glyph in different forms.
         const decomposed = canonicalize('café');
         const precomposed = canonicalize('café');
-        expect(decomposed).toEqual(precomposed);
+        expect(decomposed).toStrictEqual(precomposed);
     });
 });

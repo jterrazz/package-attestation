@@ -4,33 +4,36 @@ import { basename, dirname, extname, join } from 'node:path';
 import { buildAttestationMessage } from '../attestation/create.js';
 import { stringify } from '../attestation/serialize.js';
 import { type SignedAttestation } from '../attestation/types.js';
-import { audit } from '../primitives/audit.js';
-import { canonicalize } from '../primitives/canonicalize.js';
 import { signViaBrowser } from '../eth/sign-flow.js';
 import { stampDigest } from '../ots/stamp.js';
+import { audit } from '../primitives/audit.js';
+import { canonicalize } from '../primitives/canonicalize.js';
 import { checkmark, fmt } from './io.js';
 
 export type SignArgs = {
     file: string;
     title: string;
     slug: string;
-    locale?: string;
-    publishedAt?: string;
-    revision?: number;
-    priorAttestation?: `0x${string}`;
-    skipStamp?: boolean;
-    skipAudit?: boolean;
+    locale?: string | undefined;
+    publishedAt?: string | undefined;
+    revision?: number | undefined;
+    priorAttestation?: `0x${string}` | undefined;
+    skipStamp?: boolean | undefined;
+    skipAudit?: boolean | undefined;
 };
 
 export async function runSign(args: SignArgs): Promise<void> {
     const content = await readFile(args.file, 'utf8');
     const locale = args.locale ?? deriveLocale(args.file);
-    const publishedAt = args.publishedAt ? new Date(args.publishedAt) : new Date();
+    const publishedAt =
+        args.publishedAt === undefined || args.publishedAt === ''
+            ? new Date()
+            : new Date(args.publishedAt);
 
     const canonical = canonicalize(content);
     process.stdout.write(`${checkmark()} Canonicalized ${canonical.length} bytes (${locale})\n`);
 
-    if (!args.skipAudit) {
+    if (args.skipAudit !== true) {
         const findings = audit(canonical);
         if (findings.length > 0) {
             process.stdout.write(`${fmt.warn('!')} ${findings.length} suspicious char(s) found:\n`);
@@ -71,7 +74,7 @@ export async function runSign(args: SignArgs): Promise<void> {
     await writeFile(attestationPath, stringify(signed), 'utf8');
     process.stdout.write(`${checkmark()} Wrote ${attestationPath}\n`);
 
-    if (!args.skipStamp) {
+    if (args.skipStamp !== true) {
         process.stdout.write(`${fmt.info('→')} Submitting to OpenTimestamps calendars…\n`);
         const digest = hexToBytes(message.subject.contentDigest);
         const otsBytes = await stampDigest(digest);
@@ -88,7 +91,7 @@ export async function runSign(args: SignArgs): Promise<void> {
 
 function deriveLocale(file: string): string {
     const name = basename(file, extname(file));
-    if (/^[a-z]{2}$/.test(name)) {
+    if (/^[a-z]{2}$/u.test(name)) {
         return name;
     }
     throw new Error(
@@ -99,8 +102,8 @@ function deriveLocale(file: string): string {
 function hexToBytes(hex: `0x${string}`): Uint8Array {
     const stripped = hex.slice(2);
     const out = new Uint8Array(stripped.length / 2);
-    for (let i = 0; i < out.length; i++) {
-        out[i] = parseInt(stripped.slice(i * 2, i * 2 + 2), 16);
+    for (let i = 0; i < out.length; i += 1) {
+        out[i] = Number.parseInt(stripped.slice(i * 2, i * 2 + 2), 16);
     }
     return out;
 }

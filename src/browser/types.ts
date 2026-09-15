@@ -29,7 +29,11 @@ export type AuthorshipState =
     | { kind: 'verifying' };
 
 export type DateState =
-    | { kind: 'failed'; error: 'digest-mismatch' | 'fetch' | 'invalid-proof'; details?: string }
+    | {
+          kind: 'failed';
+          error: 'digest-mismatch' | 'fetch' | 'invalid-proof';
+          details?: string | undefined;
+      }
     | { kind: 'fetching' }
     | { kind: 'idle' }
     | { kind: 'pending' }

@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { createAttestation } from '../../src/attestation/create.js';
 import { parse, stringify } from '../../src/attestation/serialize.js';
+import { type SignedAttestation } from '../../src/attestation/types.js';
 import { verifyAttestation } from '../../src/attestation/verify.js';
 import { TEST_ADDRESS, testAccount } from '../setup/test-wallet.js';
 
@@ -18,7 +19,7 @@ const articles = [
 ] as const;
 
 describe('full sign → store → load → verify roundtrip', () => {
-    it.each(articles)('roundtrip survives JSON storage for $slug ($locale)', async (a) => {
+    test.each(articles)('roundtrip survives JSON storage for $slug ($locale)', async (a) => {
         const account = testAccount();
 
         const signed = await createAttestation(
@@ -40,7 +41,7 @@ describe('full sign → store → load → verify roundtrip', () => {
             content: a.content,
         });
 
-        expect(result.ok).toBe(true);
+        expect(result.ok).toBeTruthy();
         if (result.ok) {
             expect(result.signerAddress).toBe(TEST_ADDRESS);
         }
@@ -56,22 +57,23 @@ describe('full pipeline — negative cases', () => {
         title: 'Any',
     };
 
-    it('rejects after a single byte mutation in content', async () => {
+    test('rejects after a single byte mutation in content', async () => {
         const account = testAccount();
         const signed = await createAttestation(sample, account);
 
         const result = await verifyAttestation({
             attestation: signed,
-            content: sample.content.replace('Any', 'any'), // One byte (case) flipped mid-string
+            // One byte (case) flipped mid-string.
+            content: sample.content.replace('Any', 'any'),
         });
 
-        expect(result.ok).toBe(false);
+        expect(result.ok).toBeFalsy();
         if (!result.ok) {
             expect(result.error.kind).toBe('content-mismatch');
         }
     });
 
-    it('rejects after tampering with the title', async () => {
+    test('rejects after tampering with the title', async () => {
         const account = testAccount();
         const signed = await createAttestation(sample, account);
 
@@ -85,13 +87,13 @@ describe('full pipeline — negative cases', () => {
             content: sample.content,
         });
 
-        expect(result.ok).toBe(false);
+        expect(result.ok).toBeFalsy();
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
         }
     });
 
-    it('rejects after tampering with the publishedAt timestamp', async () => {
+    test('rejects after tampering with the publishedAt timestamp', async () => {
         const account = testAccount();
         const signed = await createAttestation(sample, account);
 
@@ -105,56 +107,73 @@ describe('full pipeline — negative cases', () => {
             content: sample.content,
         });
 
-        expect(result.ok).toBe(false);
+        expect(result.ok).toBeFalsy();
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
         }
     });
 });
 
+// The EIP-712 message hash v2 should reference; a non-zero placeholder is
+// Enough to prove the chain links.
+const PRIOR_REF = `0x${'aa'.repeat(32)}` as const;
+
+async function signRevisionPair(): Promise<{
+    v1: SignedAttestation;
+    v2: SignedAttestation;
+}> {
+    const account = testAccount();
+
+    const v1 = await createAttestation(
+        {
+            content: 'first version',
+            locale: 'en',
+            publishedAt: new Date('2026-05-09T00:00:00Z'),
+            slug: 'evolving',
+            title: 'Evolving',
+        },
+        account,
+    );
+
+    const v2 = await createAttestation(
+        {
+            content: 'second version',
+            locale: 'en',
+            priorAttestation: PRIOR_REF,
+            publishedAt: new Date('2026-05-10T00:00:00Z'),
+            revision: 2,
+            slug: 'evolving',
+            title: 'Evolving',
+        },
+        account,
+    );
+
+    return { v1, v2 };
+}
+
 describe('revision chain', () => {
-    it('chains a revision via priorAttestation', async () => {
-        const account = testAccount();
-
-        const v1 = await createAttestation(
-            {
-                content: 'first version',
-                locale: 'en',
-                publishedAt: new Date('2026-05-09T00:00:00Z'),
-                slug: 'evolving',
-                title: 'Evolving',
-            },
-            account,
-        );
-
-        // Compute the EIP-712 message hash that v2 should reference.
-        // For now we just use a non-zero placeholder to prove the chain links.
-        const priorRef = `0x${'aa'.repeat(32)}` as const;
-
-        const v2 = await createAttestation(
-            {
-                content: 'second version',
-                locale: 'en',
-                priorAttestation: priorRef,
-                publishedAt: new Date('2026-05-10T00:00:00Z'),
-                revision: 2,
-                slug: 'evolving',
-                title: 'Evolving',
-            },
-            account,
-        );
+    test('chains a revision via priorAttestation', async () => {
+        const { v1, v2 } = await signRevisionPair();
 
         expect(v1.claims.revision).toBe(1);
         expect(v1.claims.priorAttestation).toBe(`0x${'0'.repeat(64)}`);
         expect(v2.claims.revision).toBe(2);
-        expect(v2.claims.priorAttestation).toBe(priorRef);
+        expect(v2.claims.priorAttestation).toBe(PRIOR_REF);
+    });
 
-        // Both verify independently against their own content.
-        expect((await verifyAttestation({ attestation: v1, content: 'first version' })).ok).toBe(
-            true,
-        );
-        expect((await verifyAttestation({ attestation: v2, content: 'second version' })).ok).toBe(
-            true,
-        );
+    test('verifies each revision against its own content', async () => {
+        const { v1, v2 } = await signRevisionPair();
+
+        const firstResult = await verifyAttestation({
+            attestation: v1,
+            content: 'first version',
+        });
+        const secondResult = await verifyAttestation({
+            attestation: v2,
+            content: 'second version',
+        });
+
+        expect(firstResult.ok).toBeTruthy();
+        expect(secondResult.ok).toBeTruthy();
     });
 });

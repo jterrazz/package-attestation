@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { type AttestationMessage, NO_PRIOR_ATTESTATION } from '../primitives/eip712-schema.js';
 import { signViaBrowser } from './sign-flow.js';
@@ -20,33 +20,33 @@ const sampleMessage: AttestationMessage = {
 };
 
 describe('buildSignPageHtml', () => {
-    it('embeds the typed data JSON', () => {
+    test('embeds the typed data JSON', () => {
         const typedData = JSON.stringify({ marker: 'XX-MARKER-XX' });
         const html = buildSignPageHtml(typedData);
         expect(html).toContain('XX-MARKER-XX');
     });
 
-    it('escapes closing script tag', () => {
+    test('escapes closing script tag', () => {
         const typedData = JSON.stringify({ data: 'evil </script>' });
         const html = buildSignPageHtml(typedData);
         expect(html).not.toContain('evil </script>');
         expect(html).toContain(String.raw`<\/script>`);
     });
 
-    it('escapes backticks in payload', () => {
+    test('escapes backticks in payload', () => {
         const html = buildSignPageHtml(JSON.stringify({ data: 'has`backtick' }));
         expect(html).toContain('has\\`backtick');
     });
 });
 
 describe('signViaBrowser — server lifecycle', () => {
-    it('serves the sign page on GET /', async () => {
+    test('serves the sign page on GET /', async () => {
         const responses: { html?: string } = {};
 
         const promise = signViaBrowser({
             message: sampleMessage,
             onUrlReady: async (url: string) => {
-                responses.html = await fetch(url).then((r) => r.text());
+                responses.html = await fetch(url).then(async (r) => await r.text());
                 // Now POST a fake signature to /done so the flow completes.
                 await fetch(new URL('/done', url), {
                     body: JSON.stringify({
@@ -68,7 +68,7 @@ describe('signViaBrowser — server lifecycle', () => {
         expect(responses.html).toContain('test-slug');
     }, 10_000);
 
-    it('returns 404 on unknown paths', async () => {
+    test('returns 404 on unknown paths', async () => {
         let observedStatus = 0;
 
         const flow = signViaBrowser({
@@ -93,7 +93,7 @@ describe('signViaBrowser — server lifecycle', () => {
         expect(observedStatus).toBe(404);
     }, 10_000);
 
-    it('returns 400 on malformed JSON, server keeps running, user retries', async () => {
+    test('returns 400 on malformed JSON, server keeps running, user retries', async () => {
         let observedStatus = 0;
 
         const flow = signViaBrowser({
@@ -123,7 +123,7 @@ describe('signViaBrowser — server lifecycle', () => {
         expect(result.signerAddress).toBe(`0x${'4'.repeat(40)}`);
     }, 10_000);
 
-    it('returns 400 on bad signature shape, then accepts a valid one', async () => {
+    test('returns 400 on bad signature shape, then accepts a valid one', async () => {
         let observedStatus = 0;
 
         const flow = signViaBrowser({
@@ -152,7 +152,7 @@ describe('signViaBrowser — server lifecycle', () => {
         expect(result.signerAddress).toBe(`0x${'6'.repeat(40)}`);
     }, 10_000);
 
-    it('times out cleanly if no signature arrives', async () => {
+    test('times out cleanly if no signature arrives', async () => {
         const flow = signViaBrowser({
             message: sampleMessage,
             onUrlReady: () => {
@@ -161,6 +161,6 @@ describe('signViaBrowser — server lifecycle', () => {
             timeoutMs: 100,
         });
 
-        await expect(flow).rejects.toThrow(/timed out/);
+        await expect(flow).rejects.toThrow(/timed out/u);
     });
 });

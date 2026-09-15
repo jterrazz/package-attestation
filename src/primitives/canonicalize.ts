@@ -20,11 +20,11 @@ export function canonicalize(input: string): Uint8Array {
     assertValidUtf16(input);
 
     let s = input;
-    if (s.charCodeAt(0) === 0xfeff) {
+    if (s.charCodeAt(0) === 0xfe_ff) {
         s = s.slice(1);
     }
     s = s.normalize('NFC');
-    s = s.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    s = s.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
     // \s with /u flag covers all ECMAScript whitespace, including U+00A0 and U+FEFF.
     s = `${s.replace(/\s+$/u, '')}\n`;
 
@@ -42,15 +42,15 @@ export class InvalidContentError extends Error {
 }
 
 function assertValidUtf16(s: string): void {
-    for (let i = 0; i < s.length; i++) {
+    for (let i = 0; i < s.length; i += 1) {
         const code = s.charCodeAt(i);
-        if (code >= 0xd800 && code <= 0xdbff) {
+        if (code >= 0xd8_00 && code <= 0xdb_ff) {
             const next = s.charCodeAt(i + 1);
-            if (!(next >= 0xdc00 && next <= 0xdfff)) {
+            if (!(next >= 0xdc_00 && next <= 0xdf_ff)) {
                 throw new InvalidContentError(`Unpaired high surrogate at index ${i}`);
             }
-            i++;
-        } else if (code >= 0xdc00 && code <= 0xdfff) {
+            i += 1;
+        } else if (code >= 0xdc_00 && code <= 0xdf_ff) {
             throw new InvalidContentError(`Unpaired low surrogate at index ${i}`);
         }
     }

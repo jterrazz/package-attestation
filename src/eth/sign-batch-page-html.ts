@@ -5,12 +5,12 @@
  * either signs the last entry or clicks "Done".
  */
 export function buildBatchSignPageHtml(
-    entries: Array<{ id: string; label: string; typedData: object }>,
+    entries: { id: string; label: string; typedData: object }[],
 ): string {
     const escaped = JSON.stringify(entries)
-        .replace(/\\/g, String.raw`\\`)
-        .replace(/`/g, '\\`')
-        .replace(/<\/script>/gi, String.raw`<\/script>`);
+        .replaceAll('\\', String.raw`\\`)
+        .replaceAll('`', '\\`')
+        .replaceAll(/<\/script>/giu, String.raw`<\/script>`);
 
     return `<!doctype html>
 <html lang="en">

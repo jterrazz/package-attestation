@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { createAttestation } from '../../src/attestation/create.js';
 import { stringify } from '../../src/attestation/serialize.js';
@@ -55,7 +55,7 @@ function discoverArticles(): ArticleFile[] {
 const articles = discoverArticles();
 
 describe.skipIf(articles.length === 0)('every real article passes the full pipeline', () => {
-    it.each(articles)(
+    test.each(articles)(
         'canonicalize → audit → sign → verify roundtrip survives for $folder ($locale)',
         async ({ folder, locale, path }) => {
             const content = readFileSync(path, 'utf8');
@@ -80,7 +80,7 @@ describe.skipIf(articles.length === 0)('every real article passes the full pipel
                     content,
                     locale,
                     publishedAt: new Date('2026-01-01T00:00:00Z'),
-                    slug: folder.toLowerCase().replace(/\s+/g, '-'),
+                    slug: folder.toLowerCase().replaceAll(/\s+/gu, '-'),
                     title: folder,
                 },
                 account,
@@ -92,7 +92,7 @@ describe.skipIf(articles.length === 0)('every real article passes the full pipel
 
             // 5. Verify with original content.
             const result = await verifyAttestation({ attestation: signed, content });
-            expect(result.ok).toBe(true);
+            expect(result.ok).toBeTruthy();
         },
     );
 });

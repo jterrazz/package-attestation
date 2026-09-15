@@ -14,9 +14,8 @@ import { stringify } from '../src/attestation/serialize.js';
 import { testAccount } from '../tests/setup/test-wallet.js';
 
 const [folder, slug] = process.argv.slice(2);
-if (!folder || !slug) {
-    console.error('Usage: tsx scripts/demo-sign.ts <article-folder> <slug>');
-    process.exit(1);
+if (folder === undefined || folder === '' || slug === undefined || slug === '') {
+    throw new Error('Usage: tsx scripts/demo-sign.ts <article-folder> <slug>');
 }
 
 const contentDir = join(process.cwd(), '..', '..', 'content', folder);
@@ -37,4 +36,4 @@ const signed = await createAttestation(
 );
 
 await writeFile(join(contentDir, 'en.attestation.json'), stringify(signed), 'utf8');
-console.log(`✓ Wrote ${folder}/en.attestation.json`);
+process.stdout.write(`✓ Wrote ${folder}/en.attestation.json\n`);

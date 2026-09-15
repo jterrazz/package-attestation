@@ -29,7 +29,7 @@ const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
  * The local server only accepts loopback requests (127.0.0.1).
  */
 export async function signViaBrowser(opts: SignFlowOptions): Promise<SignFlowResult> {
-    const message = opts.message;
+    const { message } = opts;
     const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
     const typedData = {
@@ -40,7 +40,7 @@ export async function signViaBrowser(opts: SignFlowOptions): Promise<SignFlowRes
     };
     const html = buildSignPageHtml(JSON.stringify(typedData));
 
-    return new Promise<SignFlowResult>((resolve, reject) => {
+    return await new Promise<SignFlowResult>((resolve, reject) => {
         const server = createHttpServer((req, res) => {
             if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
                 res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
@@ -60,17 +60,19 @@ export async function signViaBrowser(opts: SignFlowOptions): Promise<SignFlowRes
                     } catch {
                         res.writeHead(400);
                         res.end('Parse error');
-                        return; // Keep server running so user can retry
+                        // Keep the server running so the user can retry.
+                        return;
                     }
                     if (
                         typeof parsed.signature !== 'string' ||
-                        !/^0x[0-9a-fA-F]{130}$/.test(parsed.signature) ||
+                        !/^0x[0-9a-fA-F]{130}$/u.test(parsed.signature) ||
                         typeof parsed.signerAddress !== 'string' ||
-                        !/^0x[0-9a-fA-F]{40}$/.test(parsed.signerAddress)
+                        !/^0x[0-9a-fA-F]{40}$/u.test(parsed.signerAddress)
                     ) {
                         res.writeHead(400);
                         res.end('Invalid payload');
-                        return; // Keep server running so user can retry
+                        // Keep the server running so the user can retry.
+                        return;
                     }
                     res.writeHead(200, { 'content-type': 'text/plain' });
                     res.end('OK');
@@ -104,7 +106,7 @@ export async function signViaBrowser(opts: SignFlowOptions): Promise<SignFlowRes
             void Promise.resolve(ready(url)).catch((error: unknown) => {
                 clearTimeout(timer);
                 server.close();
-                reject(error);
+                reject(error instanceof Error ? error : new Error(String(error)));
             });
         });
     });
@@ -132,7 +134,7 @@ function serializeMessageForBrowser(message: AttestationMessage): Record<string,
     };
 }
 
-function domainTypes(): Array<{ name: string; type: string }> {
+function domainTypes(): { name: string; type: string }[] {
     return [
         { name: 'name', type: 'string' },
         { name: 'version', type: 'string' },

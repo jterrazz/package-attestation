@@ -10,7 +10,7 @@ export type VerifyArgs = {
     /** A URL to an article, or a path to a local markdown file. */
     target: string;
     /** Skip OTS Bitcoin verification (signature-only). */
-    skipOts?: boolean;
+    skipOts?: boolean | undefined;
 };
 
 type Sources = {
@@ -35,7 +35,7 @@ export async function runVerify(args: VerifyArgs): Promise<boolean> {
         `${checkmark()} Signature valid — signed by ${fmt.bold(sigResult.signerAddress)}\n`,
     );
 
-    if (args.skipOts || sources.otsBytes === null) {
+    if (args.skipOts === true || sources.otsBytes === null) {
         process.stdout.write(`${fmt.dim('· OTS verification skipped')}\n`);
         return true;
     }
@@ -45,11 +45,12 @@ export async function runVerify(args: VerifyArgs): Promise<boolean> {
 
     if (!otsResult.ok) {
         process.stdout.write(`${crossmark()} OTS: ${otsResult.reason}`);
-        if (otsResult.details) {
+        if (otsResult.details !== undefined && otsResult.details !== '') {
             process.stdout.write(` — ${otsResult.details}`);
         }
         process.stdout.write(`\n`);
-        return otsResult.reason === 'pending-bitcoin'; // Pending is not a hard fail
+        // Pending is not a hard fail.
+        return otsResult.reason === 'pending-bitcoin';
     }
 
     process.stdout.write(
@@ -59,10 +60,10 @@ export async function runVerify(args: VerifyArgs): Promise<boolean> {
 }
 
 async function loadSources(args: VerifyArgs): Promise<Sources> {
-    if (/^https?:\/\//.test(args.target)) {
-        return loadFromUrl(args.target);
+    if (/^https?:\/\//u.test(args.target)) {
+        return await loadFromUrl(args.target);
     }
-    return loadFromFile(args.target);
+    return await loadFromFile(args.target);
 }
 
 async function loadFromFile(filePath: string): Promise<Sources> {
@@ -81,7 +82,7 @@ async function loadFromFile(filePath: string): Promise<Sources> {
 }
 
 async function loadFromUrl(url: string): Promise<Sources> {
-    const proofManifestUrl = await resolveManifestUrl(url);
+    const proofManifestUrl = resolveManifestUrl(url);
     const manifest = await fetchJson<ProofManifest>(proofManifestUrl);
 
     const base = new URL(proofManifestUrl);
@@ -101,7 +102,7 @@ type ProofManifest = {
     ots: string;
 };
 
-async function resolveManifestUrl(articleUrl: string): Promise<string> {
+function resolveManifestUrl(articleUrl: string): string {
     // Convention: append /proof.json to the article URL (trailing slash tolerated).
     const url = new URL(articleUrl);
     if (!url.pathname.endsWith('/')) {
@@ -124,7 +125,7 @@ async function fetchText(url: string): Promise<string> {
     if (!res.ok) {
         throw new Error(`Fetch ${url} failed: HTTP ${res.status}`);
     }
-    return res.text();
+    return await res.text();
 }
 
 async function fetchBytes(url: string): Promise<Uint8Array> {
@@ -148,8 +149,8 @@ function printSignatureFailure(error: Record<string, unknown> & { kind: string }
 function hexToBytes(hex: `0x${string}`): Uint8Array {
     const stripped = hex.slice(2);
     const out = new Uint8Array(stripped.length / 2);
-    for (let i = 0; i < out.length; i++) {
-        out[i] = parseInt(stripped.slice(i * 2, i * 2 + 2), 16);
+    for (let i = 0; i < out.length; i += 1) {
+        out[i] = Number.parseInt(stripped.slice(i * 2, i * 2 + 2), 16);
     }
     return out;
 }

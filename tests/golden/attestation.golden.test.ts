@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { createAttestation } from '../../src/attestation/create.js';
 import { stringify } from '../../src/attestation/serialize.js';
@@ -15,13 +15,14 @@ import { TEST_ADDRESS, testAccount } from '../setup/test-wallet.js';
 const goldenInput = {
     content: '# Architects of Inversion\n\nThe world that follows...\n',
     locale: 'en',
-    publishedAt: 1_715_212_800, // 2024-05-09T00:00:00Z, fixed for reproducibility
+    // 2024-05-09T00:00:00Z, fixed for reproducibility.
+    publishedAt: 1_715_212_800,
     slug: 'architects-of-inversion',
     title: 'Architects of Inversion',
 };
 
 describe('attestation golden — frozen signature with Hardhat test wallet', () => {
-    it('produces a known-stable signature', async () => {
+    test('produces a known-stable signature', async () => {
         const account = testAccount();
         const signed = await createAttestation(goldenInput, account);
 
@@ -35,7 +36,7 @@ describe('attestation golden — frozen signature with Hardhat test wallet', () 
         expect(signed.signerAddress).toBe(TEST_ADDRESS);
     });
 
-    it('serializes deterministically to JSON', async () => {
+    test('serializes deterministically to JSON', async () => {
         const account = testAccount();
         const signed = await createAttestation(goldenInput, account);
 
@@ -43,7 +44,7 @@ describe('attestation golden — frozen signature with Hardhat test wallet', () 
         expect(json).toMatchSnapshot();
     });
 
-    it('verifies successfully with the original content', async () => {
+    test('verifies successfully with the original content', async () => {
         const account = testAccount();
         const signed = await createAttestation(goldenInput, account);
 
@@ -52,6 +53,6 @@ describe('attestation golden — frozen signature with Hardhat test wallet', () 
             content: goldenInput.content,
         });
 
-        expect(result.ok).toBe(true);
+        expect(result.ok).toBeTruthy();
     });
 });

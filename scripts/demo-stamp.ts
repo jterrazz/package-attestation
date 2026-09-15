@@ -14,9 +14,8 @@ import { join } from 'node:path';
 import { stampDigest } from '../src/ots/stamp.js';
 
 const [folder] = process.argv.slice(2);
-if (!folder) {
-    console.error('Usage: tsx scripts/demo-stamp.ts <article-folder>');
-    process.exit(1);
+if (folder === undefined || folder === '') {
+    throw new Error('Usage: tsx scripts/demo-stamp.ts <article-folder>');
 }
 
 const contentDir = join(process.cwd(), '..', '..', 'content', folder);
@@ -27,18 +26,20 @@ const raw = await readFile(attestationPath, 'utf8');
 const parsed = JSON.parse(raw) as { subject: { contentDigest: `0x${string}` } };
 const digest = hexToBytes(parsed.subject.contentDigest);
 
-console.log(`→ Stamping digest ${parsed.subject.contentDigest} on OTS calendars…`);
+process.stdout.write(`→ Stamping digest ${parsed.subject.contentDigest} on OTS calendars…\n`);
 const otsBytes = await stampDigest(digest);
 
 await writeFile(otsPath, Buffer.from(otsBytes));
-console.log(`✓ Wrote ${otsPath} (${otsBytes.length} bytes, calendar-only)`);
-console.log(`  Run \`attestation upgrade ${otsPath}\` in ~24h to attach the Bitcoin attestation.`);
+process.stdout.write(`✓ Wrote ${otsPath} (${otsBytes.length} bytes, calendar-only)\n`);
+process.stdout.write(
+    `  Run \`attestation upgrade ${otsPath}\` in ~24h to attach the Bitcoin attestation.\n`,
+);
 
 function hexToBytes(hex: `0x${string}`): Uint8Array {
     const stripped = hex.slice(2);
     const out = new Uint8Array(stripped.length / 2);
-    for (let i = 0; i < out.length; i++) {
-        out[i] = parseInt(stripped.slice(i * 2, i * 2 + 2), 16);
+    for (let i = 0; i < out.length; i += 1) {
+        out[i] = Number.parseInt(stripped.slice(i * 2, i * 2 + 2), 16);
     }
     return out;
 }

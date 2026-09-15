@@ -84,14 +84,14 @@ export async function verifyFromUrl(
         signerAddress: sig.signerAddress,
     };
 
-    if (opts.skipOts) {
+    if (opts.skipOts === true) {
         return { authorship, date: { kind: 'skipped', reason: 'opt-out' } };
     }
 
     // OTS verification needs Node-only deps (fs, crypto) so it runs on the
     // Server. The manifest may point to a verifier endpoint that returns the
     // Result as JSON. If absent, browser falls back to "skipped".
-    if (!manifest.otsVerifier) {
+    if (manifest.otsVerifier === undefined || manifest.otsVerifier === '') {
         return { authorship, date: { kind: 'skipped', reason: 'no-ots-file' } };
     }
 
@@ -156,5 +156,5 @@ async function fetchText(fetchFn: typeof fetch, url: string): Promise<string> {
     if (!res.ok) {
         throw new Error(`GET ${url}: HTTP ${res.status}`);
     }
-    return res.text();
+    return await res.text();
 }

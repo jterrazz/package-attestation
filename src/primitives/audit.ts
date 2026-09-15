@@ -8,15 +8,15 @@
 
 const SUSPICIOUS: ReadonlyMap<number, string> = new Map([
     [0x20_0b, 'zero-width space'],
-    [0x200c, 'zero-width non-joiner'],
-    [0x200d, 'zero-width joiner'],
+    [0x20_0c, 'zero-width non-joiner'],
+    [0x20_0d, 'zero-width joiner'],
     [0x20_60, 'word joiner'],
-    [0xfeff, 'zero-width no-break space (interior BOM)'],
+    [0xfe_ff, 'zero-width no-break space (interior BOM)'],
     [0x20_2a, 'left-to-right embedding'],
-    [0x202b, 'right-to-left embedding'],
-    [0x202c, 'pop directional formatting'],
-    [0x202d, 'left-to-right override'],
-    [0x202e, 'right-to-left override'],
+    [0x20_2b, 'right-to-left embedding'],
+    [0x20_2c, 'pop directional formatting'],
+    [0x20_2d, 'left-to-right override'],
+    [0x20_2e, 'right-to-left override'],
     [0x20_66, 'left-to-right isolate'],
     [0x20_67, 'right-to-left isolate'],
     [0x20_68, 'first strong isolate'],
@@ -42,7 +42,7 @@ export function audit(canonical: Uint8Array): AuditFinding[] {
             continue;
         }
         if (cp === 0x0a) {
-            line++;
+            line += 1;
             column = 1;
             continue;
         }
@@ -50,7 +50,7 @@ export function audit(canonical: Uint8Array): AuditFinding[] {
         if (name !== undefined) {
             findings.push({ codepoint: cp, column, line, name });
         }
-        column++;
+        column += 1;
     }
 
     return findings;

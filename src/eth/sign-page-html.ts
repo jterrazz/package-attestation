@@ -10,9 +10,9 @@ export function buildSignPageHtml(typedDataJson: string): string {
     // TypedDataJson MUST already be a JSON string of EIP-712 v4 typed data
     // (with `domain`, `types`, `primaryType`, `message`).
     const escaped = typedDataJson
-        .replace(/\\/g, String.raw`\\`)
-        .replace(/`/g, '\\`')
-        .replace(/<\/script>/gi, String.raw`<\/script>`);
+        .replaceAll('\\', String.raw`\\`)
+        .replaceAll('`', '\\`')
+        .replaceAll(/<\/script>/giu, String.raw`<\/script>`);
 
     return `<!doctype html>
 <html lang="en">

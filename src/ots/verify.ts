@@ -78,13 +78,15 @@ export async function verifyOts(
     // `ignoreBitcoinNode` — pass both so either side of that drift works.
     // The esplora timeout is documented as seconds but flows straight into
     // Request-promise, which reads milliseconds — so this is 10s, not 10000s.
-    const verifyOptions = options?.explorerUrl
-        ? {
-              esplora: { timeout: 10_000, url: options.explorerUrl },
-              ignore_bitcoin_node: true,
-              ignoreBitcoinNode: true,
-          }
-        : undefined;
+    const explorerUrl = options?.explorerUrl ?? '';
+    const verifyOptions =
+        explorerUrl === ''
+            ? undefined
+            : {
+                  esplora: { timeout: 10_000, url: explorerUrl },
+                  ignore_bitcoin_node: true,
+                  ignoreBitcoinNode: true,
+              };
 
     let attestations: Record<string, { timestamp: number }>;
     try {
@@ -102,7 +104,7 @@ export async function verifyOts(
         return { details: (error as Error).message, ok: false, reason: 'invalid-proof' };
     }
 
-    const bitcoin = attestations['bitcoin'];
+    const { bitcoin } = attestations;
     if (bitcoin === undefined) {
         return { ok: false, reason: 'pending-bitcoin' };
     }
