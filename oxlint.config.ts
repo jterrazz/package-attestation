@@ -1,13 +1,12 @@
-import { oxlint } from '@jterrazz/typescript';
-import { defineConfig } from 'oxlint';
+import { testing } from '@jterrazz/test/oxlint';
+import { compose, defineConfig, library, type OxlintConfig } from '@jterrazz/typescript/oxlint';
 
-export default defineConfig({
-    extends: [oxlint.node],
-    ignorePatterns: ['tests/**/fixtures/**', 'dist/**'],
-    rules: {
-        'import/exports-last': 'off',
-        'unicorn/no-await-expression-member': 'off',
-        'unicorn/number-literal-case': 'off',
-        'unicorn/numeric-separators-style': 'off',
-    },
-});
+/*
+ * `testing` is declared with widened property types in @jterrazz/test 15
+ * (`rules: { 'import/exports-last': string }` instead of oxlint's closed level
+ * union), so it does not structurally satisfy `OxlintConfig` — the assertion
+ * states what the fragment is until the type ships narrowed upstream.
+ */
+const config: OxlintConfig = defineConfig(compose(library, testing as OxlintConfig));
+
+export default config;

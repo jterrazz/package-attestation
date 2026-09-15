@@ -1,4 +1,5 @@
-import { oxfmt } from '@jterrazz/typescript';
-import { defineConfig } from 'oxfmt';
+import { base, defineConfig, type OxfmtConfig } from '@jterrazz/typescript/oxfmt';
 
-export default defineConfig(oxfmt);
+const config: OxfmtConfig = defineConfig(base);
+
+export default config;
