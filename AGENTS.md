@@ -27,7 +27,7 @@ npm ci
 | Task                                     | Command             |
 | ---------------------------------------- | ------------------- |
 | Build                                    | `make build`        |
-| Lint + format + typecheck + knip + docs  | `make lint`         |
+| Every quality gate (lint, format, types) | `make lint`         |
 | Auto-fix lint issues                     | `make lint-fix`     |
 | Run all tests (offline)                  | `make test`         |
 | Run the OpenTimestamps network suite too | `make test-network` |
