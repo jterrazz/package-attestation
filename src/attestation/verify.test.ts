@@ -23,7 +23,7 @@ describe('verifyAttestation — happy path', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBeTruthy();
+        expect(result.ok).toBe(true);
         if (result.ok) {
             expect(result.signerAddress).toBe(TEST_ADDRESS);
         }
@@ -38,7 +38,7 @@ describe('verifyAttestation — happy path', () => {
             content: '# Hello\r\n\r\nWorld.\r\n',
         });
 
-        expect(result.ok).toBeTruthy();
+        expect(result.ok).toBe(true);
     });
 });
 
@@ -53,7 +53,7 @@ describe('verifyAttestation — rejection paths', () => {
             content: '# Hello\n\nWorl.',
         });
 
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.error.kind).toBe('content-mismatch');
         }
@@ -73,7 +73,7 @@ describe('verifyAttestation — rejection paths', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(['invalid-signature', 'signer-mismatch']).toContain(result.error.kind);
         }
@@ -93,7 +93,7 @@ describe('verifyAttestation — rejection paths', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
         }
@@ -113,7 +113,7 @@ describe('verifyAttestation — rejection paths', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
         }
@@ -130,7 +130,7 @@ describe('verifyAttestation — rejection paths', () => {
             content: baseInput.content,
         });
 
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.error.kind).toBe('schema-version-unsupported');
             if (result.error.kind === 'schema-version-unsupported') {

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { createAttestation } from '../../src/attestation/create.js';
-import { stringify } from '../../src/attestation/serialize.js';
+import { parse, stringify } from '../../src/attestation/serialize.js';
 import { verifyAttestation } from '../../src/attestation/verify.js';
 import { audit } from '../../src/primitives/audit.js';
 import { canonicalize } from '../../src/primitives/canonicalize.js';
@@ -88,11 +88,11 @@ describe.skipIf(articles.length === 0)('every real article passes the full pipel
 
             // 4. JSON roundtrip.
             const json = stringify(signed);
-            expect(JSON.parse(json)).toBeTruthy();
+            expect(parse(json)).toStrictEqual(signed);
 
             // 5. Verify with original content.
             const result = await verifyAttestation({ attestation: signed, content });
-            expect(result.ok).toBeTruthy();
+            expect(result.ok).toBe(true);
         },
     );
 });

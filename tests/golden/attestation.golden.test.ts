@@ -53,6 +53,6 @@ describe('attestation golden — frozen signature with Hardhat test wallet', () 
             content: goldenInput.content,
         });
 
-        expect(result.ok).toBeTruthy();
+        expect(result.ok).toBe(true);
     });
 });

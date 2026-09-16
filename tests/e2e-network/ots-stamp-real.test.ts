@@ -22,7 +22,7 @@ describe.skipIf(!networkSuiteEnabled)('the OTS live calendar submission', () => 
         // Immediately after stamping, the proof has only calendar attestations,
         // No Bitcoin yet. So verifyOts should report 'pending-bitcoin'.
         const result = await verifyOts(digest, proof);
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.reason).toBe('pending-bitcoin');
         }

@@ -38,8 +38,8 @@ describe('serialize — roundtrip', () => {
         const signed = await createAttestation(baseInput, account);
 
         const json = stringify(signed);
-        expect(json.endsWith('\n')).toBeTruthy();
-        expect(json.endsWith('\n\n')).toBeFalsy();
+        expect(json.endsWith('\n')).toBe(true);
+        expect(json.endsWith('\n\n')).toBe(false);
     });
 
     test('stringifies publishedAt as a string (JSON has no bigint)', async () => {

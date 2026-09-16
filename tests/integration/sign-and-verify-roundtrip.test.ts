@@ -41,7 +41,7 @@ describe('full sign → store → load → verify roundtrip', () => {
             content: a.content,
         });
 
-        expect(result.ok).toBeTruthy();
+        expect(result.ok).toBe(true);
         if (result.ok) {
             expect(result.signerAddress).toBe(TEST_ADDRESS);
         }
@@ -67,7 +67,7 @@ describe('full pipeline — negative cases', () => {
             content: sample.content.replace('Any', 'any'),
         });
 
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.error.kind).toBe('content-mismatch');
         }
@@ -87,7 +87,7 @@ describe('full pipeline — negative cases', () => {
             content: sample.content,
         });
 
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
         }
@@ -107,7 +107,7 @@ describe('full pipeline — negative cases', () => {
             content: sample.content,
         });
 
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
         }
@@ -173,7 +173,7 @@ describe('revision chain', () => {
             content: 'second version',
         });
 
-        expect(firstResult.ok).toBeTruthy();
-        expect(secondResult.ok).toBeTruthy();
+        expect(firstResult.ok).toBe(true);
+        expect(secondResult.ok).toBe(true);
     });
 });

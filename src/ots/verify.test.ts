@@ -5,7 +5,7 @@ import { verifyOts } from './verify.js';
 describe('verifyOts — input validation', () => {
     test('rejects a non-32-byte digest', async () => {
         const result = await verifyOts(new Uint8Array(31), new Uint8Array(0));
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.reason).toBe('digest-mismatch');
         }
@@ -15,7 +15,7 @@ describe('verifyOts — input validation', () => {
         const validDigest = new Uint8Array(32);
         const garbage = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
         const result = await verifyOts(validDigest, garbage);
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.reason).toBe('invalid-proof');
         }
@@ -26,7 +26,7 @@ describe('verifyOts — input validation', () => {
         const result = await verifyOts(new Uint8Array(31), new Uint8Array(0), {
             explorerUrl: 'http://127.0.0.1:9',
         });
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.reason).toBe('digest-mismatch');
         }
@@ -39,7 +39,7 @@ describe('verifyOts — input validation', () => {
         const result = await verifyOts(validDigest, garbage, {
             explorerUrl: 'http://127.0.0.1:9',
         });
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.reason).toBe('invalid-proof');
         }
