@@ -1,4 +1,5 @@
-import { defineConfig, type UserConfig } from 'tsdown';
+import { defineConfig } from 'tsdown';
+import type { UserConfig } from 'tsdown';
 
 const config: UserConfig = defineConfig({
     entry: ['src/index.ts', 'src/browser.ts', 'src/node.ts', 'src/cli.ts'],

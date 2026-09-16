@@ -49,8 +49,8 @@
         "viem": "^2.54.1"
     },
     "devDependencies": {
-        "@jterrazz/test": "^15.0.0",
-        "@jterrazz/typescript": "^10.0.0",
+        "@jterrazz/test": "^15.1.0",
+        "@jterrazz/typescript": "^10.1.6",
         "@types/node": "^24.13.2",
         "tsdown": "^0.22.3",
         "vitest": "^4.1.9"
