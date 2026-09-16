@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { TEST_ADDRESS, testAccount } from '../../tests/setup/test-wallet.js';
 import { createAttestation } from './create.js';
-import { type SignedAttestation } from './types.js';
+import type { SignedAttestation } from './types.js';
 import { verifyAttestation } from './verify.js';
 
 const baseInput = {

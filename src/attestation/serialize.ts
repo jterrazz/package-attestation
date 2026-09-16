@@ -1,4 +1,4 @@
-import { type SignedAttestation, type StoredAttestation } from './types.js';
+import type { SignedAttestation, StoredAttestation } from './types.js';
 
 export function toStored(att: SignedAttestation): StoredAttestation {
     return {

@@ -1,4 +1,4 @@
-import { type SignedAttestation, type VerifyError } from '../attestation/types.js';
+import type { SignedAttestation, VerifyError } from '../attestation/types.js';
 
 export type ProofManifest = {
     schemaVersion: number;

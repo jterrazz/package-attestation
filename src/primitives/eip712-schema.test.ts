@@ -5,9 +5,9 @@ import {
     ATTESTATION_DOMAIN_V1,
     ATTESTATION_PRIMARY_TYPE,
     ATTESTATION_TYPES_V1,
-    type AttestationMessage,
     NO_PRIOR_ATTESTATION,
 } from './eip712-schema.js';
+import type { AttestationMessage } from './eip712-schema.js';
 
 describe('the EIP-712 schema v1 — frozen contract', () => {
     test('domain has the exact frozen values', () => {

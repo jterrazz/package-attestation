@@ -8,7 +8,7 @@ import {
 } from '../primitives/eip712-schema.js';
 import { sha256Hex } from '../primitives/sha256.js';
 import { SCHEMA_VERSION } from '../version.js';
-import { type SignedAttestation, type VerifyResult } from './types.js';
+import type { SignedAttestation, VerifyResult } from './types.js';
 
 export type VerifyInput = {
     content: string;

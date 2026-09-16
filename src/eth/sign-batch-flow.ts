@@ -1,12 +1,12 @@
 import { createServer } from 'node:http';
-import { type AddressInfo } from 'node:net';
+import type { AddressInfo } from 'node:net';
 
 import {
     ATTESTATION_DOMAIN_V1,
     ATTESTATION_PRIMARY_TYPE,
     ATTESTATION_TYPES_V1,
-    type AttestationMessage,
 } from '../primitives/eip712-schema.js';
+import type { AttestationMessage } from '../primitives/eip712-schema.js';
 import { buildBatchSignPageHtml } from './sign-batch-page-html.js';
 
 export type BatchSignEntry = {

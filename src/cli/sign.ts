@@ -3,7 +3,7 @@ import { basename, dirname, extname, join } from 'node:path';
 
 import { buildAttestationMessage } from '../attestation/create.js';
 import { stringify } from '../attestation/serialize.js';
-import { type SignedAttestation } from '../attestation/types.js';
+import type { SignedAttestation } from '../attestation/types.js';
 import { signViaBrowser } from '../eth/sign-flow.js';
 import { stampDigest } from '../ots/stamp.js';
 import { audit } from '../primitives/audit.js';

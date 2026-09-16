@@ -1,6 +1,6 @@
 import { parse } from '../attestation/serialize.js';
 import { verifyAttestation } from '../attestation/verify.js';
-import { type AuthorshipState, type DateState, type ProofManifest } from './types.js';
+import type { AuthorshipState, DateState, ProofManifest } from './types.js';
 
 export type VerifyFromUrlOptions = {
     /**

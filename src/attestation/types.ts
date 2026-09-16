@@ -1,4 +1,4 @@
-import { type AttestationMessage } from '../primitives/eip712-schema.js';
+import type { AttestationMessage } from '../primitives/eip712-schema.js';
 
 export type SignedAttestation = AttestationMessage & {
     signature: `0x${string}`;

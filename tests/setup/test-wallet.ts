@@ -1,4 +1,5 @@
-import { type LocalAccount, privateKeyToAccount } from 'viem/accounts';
+import { privateKeyToAccount } from 'viem/accounts';
+import type { LocalAccount } from 'viem/accounts';
 
 /**
  * Hardhat default mnemonic, account[0]. Used for all signing tests in this package.

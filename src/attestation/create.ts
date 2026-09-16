@@ -1,16 +1,16 @@
-import { type LocalAccount } from 'viem';
+import type { LocalAccount } from 'viem';
 
 import { canonicalize } from '../primitives/canonicalize.js';
 import {
     ATTESTATION_DOMAIN_V1,
     ATTESTATION_PRIMARY_TYPE,
     ATTESTATION_TYPES_V1,
-    type AttestationMessage,
     NO_PRIOR_ATTESTATION,
 } from '../primitives/eip712-schema.js';
+import type { AttestationMessage } from '../primitives/eip712-schema.js';
 import { sha256Hex } from '../primitives/sha256.js';
 import { SCHEMA_VERSION } from '../version.js';
-import { type SignedAttestation } from './types.js';
+import type { SignedAttestation } from './types.js';
 
 export type CreateAttestationInput = {
     content: string;
