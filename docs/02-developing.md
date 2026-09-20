@@ -33,7 +33,7 @@ A module's home is one of the six folders in [01-architecture.md](01-architectur
 - The wallet-signing HTTP flow (`src/eth/`) is Node-only and exported from `src/node.ts`.
 - A CLI subcommand's parsing and terminal output go in `src/cli/`; the command dispatch table is `src/cli/index.ts`.
 
-A module's unit test is its sibling (`create.ts` / `create.test.ts`); a test whose oracle is a frozen file, a real article tree or a real calendar is an integration spec under `specs/integration/` — which domain, in [03-testing.md](03-testing.md). A helper two tests share is a `*.fixtures.ts` beside the code it builds, never an import from one test file into another: `src/attestation/wallet.fixtures.ts` is the signing wallet every suite uses.
+A module's unit test is its sibling (`create.ts` / `create.test.ts`); a test whose oracle is a frozen file, a real article tree or a real calendar is an integration spec under `specs/integration/`, and there it is named `<aspect>.spec.ts` — which domain, in [03-testing.md](03-testing.md). A helper two tests share is a `*.fixtures.ts` beside the code it builds, never an import from one test file into another: `src/attestation/wallet.fixtures.ts` is the signing wallet every suite uses.
 
 ## Conventions a change must keep
 
