@@ -1,0 +1,22 @@
+{
+    "record": {
+        "claims": {
+            "priorAttestation": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "publishedAt": "1778284800",
+            "revision": 1,
+            "slug": "unicode"
+        },
+        "schemaVersion": 1,
+        "signature": "0x75adad3dbef1a253c0baf3eedc12816fd27b466b412f099cdf930c0410eb675869059f6d4848e695776df4a7456fb0f30dfc20632145f9342f8c60d61f3aa7861b",
+        "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "subject": {
+            "contentDigest": "0x1fad5e094a7062913c127cc46fa32f8b5b1d90a6a766aead77d3635901bb85d4",
+            "locale": "fr",
+            "title": "Test article unicode"
+        }
+    },
+    "verdict": {
+        "ok": true,
+        "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+    }
+}

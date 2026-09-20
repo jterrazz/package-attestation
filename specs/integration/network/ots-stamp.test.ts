@@ -1,30 +1,37 @@
 import { createHash } from 'node:crypto';
-import { describe, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 
 import { stampDigest } from '../../../src/ots/stamp.js';
 import { verifyOts } from '../../../src/ots/verify.js';
+import { integration } from '../integration.specification.js';
 
 /**
- * Live OTS network test. Gated behind ATTEST_E2E_NETWORK=1, run via `make test-network`.
- * Submits a real digest to public OTS calendar servers — should never run in CI.
+ * The live OpenTimestamps calendar — the one suite that leaves the machine.
+ * `vitest.config.ts` collects this folder only when ATTEST_E2E_NETWORK is
+ * set, which `npm run test:network` is the one command to do.
+ *
+ * Nothing here can be goldened: the proof a calendar returns is new on every
+ * run, and a fresh digest is precisely what keeps the calendar clean.
  */
-const networkSuiteEnabled = (process.env.ATTEST_E2E_NETWORK ?? '') !== '';
 
-describe.skipIf(!networkSuiteEnabled)('the OTS live calendar submission', () => {
-    test('stamps a unique digest and parses the returned proof', async () => {
-        // Use a unique-ish digest so we don't pollute the calendar with duplicates.
+test('a fresh digest comes back stamped, and pending its Bitcoin attestation', async () => {
+    // Given - a digest no calendar has seen, submitted to the real ones
+    const result = await integration.call(async () => {
         const unique = `attestation-package-test-${Date.now()}-${Math.random()}`;
         const digest = new Uint8Array(createHash('sha256').update(unique).digest());
-
         const proof = await stampDigest(digest);
-        expect(proof.length).toBeGreaterThan(0);
+        const verdict = await verifyOts(digest, proof);
 
-        // Immediately after stamping, the proof has only calendar attestations,
-        // No Bitcoin yet. So verifyOts should report 'pending-bitcoin'.
-        const result = await verifyOts(digest, proof);
-        expect(result.ok).toBe(false);
-        if (!result.ok) {
-            expect(result.reason).toBe('pending-bitcoin');
-        }
-    }, 30_000);
-});
+        return {
+            proofLength: proof.length,
+            reason: verdict.ok ? null : verdict.reason,
+            verified: verdict.ok,
+        };
+    });
+
+    // Then - a non-empty proof that carries calendar attestations only
+    expect(result.value.value.proofLength).toBeGreaterThan(0);
+    expect(result.value.value.verified).toBe(false);
+    expect(result.value.value.reason).toBe('pending-bitcoin');
+    await expect(result.error).toBeEmpty();
+}, 30_000);

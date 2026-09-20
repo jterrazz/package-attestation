@@ -82,6 +82,7 @@ describe('createAttestation', () => {
 
 describe('createAttestation — the revision chain', () => {
     test('carries an explicit revision and the attestation it follows', async () => {
+        // Given - a second version signed against the attestation it revises
         const account = testAccount();
         const prior = `0x${'aa'.repeat(32)}` as const;
 
@@ -95,6 +96,7 @@ describe('createAttestation — the revision chain', () => {
             account,
         );
 
+        // Then - the claims carry both, rather than the defaults
         expect(second.claims.revision).toBe(2);
         expect(second.claims.priorAttestation).toBe(prior);
     });

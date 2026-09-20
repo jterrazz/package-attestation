@@ -1,0 +1,22 @@
+{
+    "record": {
+        "claims": {
+            "priorAttestation": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "publishedAt": "1778284800",
+            "revision": 1,
+            "slug": "cjk"
+        },
+        "schemaVersion": 1,
+        "signature": "0xc474a604ec6c942b2bfbb8cf6ed0b77ce09e3e6096f6db5e6d172893e1f7432751bec67a8509351d84759a1b9fe06c60256f587ea7ac52b89b30cebe5554aca31b",
+        "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "subject": {
+            "contentDigest": "0xcd99a803232805a405cd94b3ea526d00f318e23ab0e99b6319ffa012ea433d10",
+            "locale": "ja",
+            "title": "Test article cjk"
+        }
+    },
+    "verdict": {
+        "ok": true,
+        "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+    }
+}
