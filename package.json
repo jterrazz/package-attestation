@@ -49,11 +49,11 @@
         "viem": "^2.54.1"
     },
     "devDependencies": {
-        "@jterrazz/test": "^15.3.0",
-        "@jterrazz/typescript": "^10.2.2",
+        "@jterrazz/test": "^16.0.0",
+        "@jterrazz/typescript": "^10.3.0",
         "@types/node": "^24.13.2",
         "tsdown": "^0.22.3",
-        "vitest": "^4.1.9"
+        "vitest": "^5.0.1"
     },
     "engines": {
         "node": ">=24"
