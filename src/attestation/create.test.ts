@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { TEST_ADDRESS, testAccount } from '../../tests/setup/test-wallet.js';
 import { SCHEMA_VERSION } from '../index.js';
 import { NO_PRIOR_ATTESTATION } from '../primitives/eip712-schema.js';
 import { buildAttestationMessage, createAttestation, signAttestation } from './create.js';
+import { TEST_ADDRESS, testAccount } from './wallet.fixtures.js';
 
 const baseInput = {
     content: '# Hello\n\nWorld.',
@@ -77,5 +77,25 @@ describe('createAttestation', () => {
         const signed = await createAttestation(baseInput, account);
         expect(signed.signerAddress).toBe(TEST_ADDRESS);
         expect(signed.signature).toMatch(/^0x[0-9a-f]{130}$/u);
+    });
+});
+
+describe('createAttestation — the revision chain', () => {
+    test('carries an explicit revision and the attestation it follows', async () => {
+        const account = testAccount();
+        const prior = `0x${'aa'.repeat(32)}` as const;
+
+        const second = await createAttestation(
+            {
+                ...baseInput,
+                content: 'second version',
+                priorAttestation: prior,
+                revision: 2,
+            },
+            account,
+        );
+
+        expect(second.claims.revision).toBe(2);
+        expect(second.claims.priorAttestation).toBe(prior);
     });
 });

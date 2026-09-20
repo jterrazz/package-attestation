@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { TEST_ADDRESS, testAccount } from '../../tests/setup/test-wallet.js';
 import { createAttestation } from './create.js';
 import type { SignedAttestation } from './types.js';
 import { verifyAttestation } from './verify.js';
+import { TEST_ADDRESS, testAccount } from './wallet.fixtures.js';
 
 const baseInput = {
     content: '# Hello\n\nWorld.',
@@ -136,6 +136,48 @@ describe('verifyAttestation — rejection paths', () => {
             if (result.error.kind === 'schema-version-unsupported') {
                 expect(result.error.version).toBe(999);
             }
+        }
+    });
+});
+
+describe('verifyAttestation — tampering with a signed subject', () => {
+    test('rejects after the title has been rewritten', async () => {
+        const account = testAccount();
+        const signed = await createAttestation(baseInput, account);
+
+        const tampered = {
+            ...signed,
+            subject: { ...signed.subject, title: 'Different Title' },
+        };
+
+        const result = await verifyAttestation({
+            attestation: tampered,
+            content: baseInput.content,
+        });
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.error.kind).toBe('signer-mismatch');
+        }
+    });
+
+    test('rejects after the publishedAt timestamp has been moved', async () => {
+        const account = testAccount();
+        const signed = await createAttestation(baseInput, account);
+
+        const tampered = {
+            ...signed,
+            claims: { ...signed.claims, publishedAt: signed.claims.publishedAt + 1n },
+        };
+
+        const result = await verifyAttestation({
+            attestation: tampered,
+            content: baseInput.content,
+        });
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.error.kind).toBe('signer-mismatch');
         }
     });
 });

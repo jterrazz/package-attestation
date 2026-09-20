@@ -40,7 +40,7 @@
         "lint": "typescript check",
         "lint:fix": "typescript fix",
         "test": "vitest --run",
-        "test:network": "ATTEST_E2E_NETWORK=1 vitest --run --project e2e-network"
+        "test:network": "ATTEST_E2E_NETWORK=1 vitest --run"
     },
     "dependencies": {
         "@noble/hashes": "^2.2.0",

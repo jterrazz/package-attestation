@@ -1,33 +1,56 @@
 # Testing
 
-What proves a change here, and what a golden pins.
+What proves a change here, where a new test goes, and what a golden pins.
 
 ```bash
-npm test              # vitest --run — every project below except e2e-network
-npm run test:network  # + e2e-network (ATTEST_E2E_NETWORK=1)
+npm test              # vitest --run — the unit and integration projects
+npm run test:network  # + the live OpenTimestamps folder (ATTEST_E2E_NETWORK=1)
 ```
 
-## Five projects, one `vitest.config.ts`
+## Two projects, one `vitest.config.ts`
 
-| Project         | Runs                               | Proves                                                                                      |
-| --------------- | ---------------------------------- | ------------------------------------------------------------------------------------------- |
-| `unit`          | `src/**/*.test.ts`                 | Each module against its own sibling test — pure functions, no network                       |
-| `golden`        | `tests/golden/**/*.test.ts`        | The frozen v1 byte contracts — see below                                                    |
-| `integration`   | `tests/integration/**/*.test.ts`   | The full sign → store → load → verify roundtrip, plus tampering and the revision chain      |
-| `articles-real` | `tests/articles-real/**/*.test.ts` | The pipeline against real article content, when a sibling checkout supplies any — see below |
-| `e2e-network`   | `tests/e2e-network/**/*.test.ts`   | A real OpenTimestamps calendar submission — excluded unless `ATTEST_E2E_NETWORK=1`          |
+| Project       | Collects                         | Proves                                                                  |
+| ------------- | -------------------------------- | ----------------------------------------------------------------------- |
+| `unit`        | `**/*.test.ts` outside `specs/`  | Each module against its own sibling test — pure functions, no network   |
+| `integration` | `specs/integration/**/*.test.ts` | A module against the real thing: a golden, a real file tree, a calendar |
+
+Both come from `@jterrazz/test`'s project helpers — `unit()` and `integration()` — so the timeouts, the artefact directory and the excluded ground are the preset's, not this repository's to restate. What each helper carries is `@jterrazz/test`'s own chapter on the integration facet.
+
+Which of the two a test belongs to is decided by its SUBJECT, never by how much machinery it needs. A module alone is a module test, beside its code. A module whose oracle is a golden file — or that stands on a real file tree or a real network — is an integration spec.
+
+## The spec tree
+
+```text
+specs/integration/
+├── integration.specification.ts   # the runner, at the facet root — no services
+├── golden/                        # the frozen v1 byte contracts
+│   ├── attestation.test.ts
+│   ├── canonicalize.test.ts
+│   └── schema.test.ts
+├── articles/                      # the pipeline over article content
+│   ├── pipeline.test.ts
+│   └── roundtrip.test.ts
+└── network/                       # a live OpenTimestamps calendar — gated
+    └── ots-stamp.test.ts
+```
+
+`specs/integration/integration.specification.ts` declares no `services`: nothing this package integrates with is a container. It is the golden half of the facet: what earns a spec its place here is its ORACLE — a frozen file, a real article tree, a real calendar — never the amount of machinery it starts.
 
 ## What a golden pins
 
-`tests/golden/canonicalize.golden.test.ts` and `tests/golden/attestation.golden.test.ts` snapshot the exact bytes and digest that `canonicalize()` v1 produces for a fixed set of inputs (empty string, CRLF, a leading BOM, combining vs. precomposed diacritics, RTL text, emoji, code-block whitespace). These snapshots ARE the v1 contract: if one changes, every attestation ever signed against v1 becomes unverifiable. A snapshot is updated only by introducing `CANONICAL_VERSION = 2` alongside v1, never by regenerating it in place — see [05-signing-and-anchoring.md](05-signing-and-anchoring.md).
+`specs/integration/golden/` holds the exact bytes and digests that v1 produces for a fixed set of inputs: the empty string, CRLF, a leading BOM, combining versus precomposed diacritics, RTL text, emoji, code-block whitespace, and one frozen article signed with the Hardhat test wallet. These ARE the v1 contract: if one changes, every attestation ever signed against v1 becomes unverifiable.
 
-## `articles-real` is optional by design
+A golden here is updated only by introducing `CANONICAL_VERSION = 2` alongside v1, never by regenerating it in place — see [05-signing-and-anchoring.md](05-signing-and-anchoring.md).
 
-`tests/articles-real/all-articles-pipeline.test.ts` reads `../../content` relative to the process's working directory — the article tree of a sibling `jterrazz-web` checkout, when this package is worked on nested inside one. When that directory is absent, `readdirSync` throws, the test catches it and the suite discovers zero articles: the project passes with nothing exercised. Today nothing in this repository's own tree supplies that content, so run the suite from a workspace that does when its coverage matters.
+## `articles/pipeline.test.ts` is optional by design
 
-## `e2e-network` is opt-in, on purpose
+`specs/integration/articles/pipeline.test.ts` reads `../../content` relative to the process's working directory — the article tree of a sibling `jterrazz-web` checkout, when this package is worked on nested inside one. When that directory is absent, `readdirSync` throws, the discovery catches it and the suite finds zero articles: the file skips with nothing exercised. Today nothing in this repository's own tree supplies that content, so run it from a workspace that does when its coverage matters.
 
-The project's `include` glob is entirely excluded unless `ATTEST_E2E_NETWORK` is set — `vitest.config.ts` reads the environment variable to build the `exclude` list. `npm run test:network` is the one command that sets it. This is the only suite that reaches a real OpenTimestamps calendar; every other project, `unit` through `articles-real`, runs fully offline.
+## `network/` is opt-in, on purpose
+
+The folder is an `exclude` option of the `integration` project, not a project of its own: `vitest.config.ts` reads `ATTEST_E2E_NETWORK` and drops `specs/integration/network/**` from the collection unless it is set. `npm run test:network` is the one command that sets it.
+
+That folder holds the only suite reaching a real OpenTimestamps calendar. Everything else — `unit`, `golden/`, `articles/` — runs fully offline.
 
 ## Related
 

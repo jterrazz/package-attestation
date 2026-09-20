@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { testAccount } from '../../tests/setup/test-wallet.js';
 import { createAttestation } from './create.js';
 import { fromStored, parse, stringify, toStored } from './serialize.js';
+import { testAccount } from './wallet.fixtures.js';
 
 const baseInput = {
     content: '# Hello\n\nWorld.',
