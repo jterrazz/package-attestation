@@ -1,0 +1,48 @@
+{
+    "Attestation": [
+        {
+            "name": "schemaVersion",
+            "type": "uint16"
+        },
+        {
+            "name": "subject",
+            "type": "ArticleSubject"
+        },
+        {
+            "name": "claims",
+            "type": "ArticleClaims"
+        }
+    ],
+    "ArticleClaims": [
+        {
+            "name": "slug",
+            "type": "string"
+        },
+        {
+            "name": "publishedAt",
+            "type": "uint64"
+        },
+        {
+            "name": "revision",
+            "type": "uint16"
+        },
+        {
+            "name": "priorAttestation",
+            "type": "bytes32"
+        }
+    ],
+    "ArticleSubject": [
+        {
+            "name": "title",
+            "type": "string"
+        },
+        {
+            "name": "contentDigest",
+            "type": "bytes32"
+        },
+        {
+            "name": "locale",
+            "type": "string"
+        }
+    ]
+}

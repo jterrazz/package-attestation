@@ -1,0 +1,22 @@
+{
+    "record": {
+        "claims": {
+            "priorAttestation": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "publishedAt": "1778284800",
+            "revision": 1,
+            "slug": "markdown-features"
+        },
+        "schemaVersion": 1,
+        "signature": "0x2db15529f7febe06c27ca84c984f3ebeda27634f51d4e3d2b38758a925324f982240be5b97f4eba50f1e6700294d3310a9edd2b3bfb1461242e2224b67635eca1c",
+        "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "subject": {
+            "contentDigest": "0xfd2420a6d7a012e1600c0fadf235724d3b62021373410403df4ebb28f9f09b83",
+            "locale": "en",
+            "title": "Test article markdown-features"
+        }
+    },
+    "verdict": {
+        "ok": true,
+        "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+    }
+}

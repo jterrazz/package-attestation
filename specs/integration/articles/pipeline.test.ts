@@ -6,15 +6,17 @@ import { createAttestation } from '../../../src/attestation/create.js';
 import { parse, stringify } from '../../../src/attestation/serialize.js';
 import { verifyAttestation } from '../../../src/attestation/verify.js';
 import { testAccount } from '../../../src/attestation/wallet.fixtures.js';
-import { audit } from '../../../src/primitives/audit.js';
 import { canonicalize } from '../../../src/primitives/canonicalize.js';
+import { integration } from '../integration.specification.js';
 
 /**
- * Runs the full attestation pipeline against every real article in jterrazz-web.
- * Catches the case where an exotic Unicode char in a freshly written article
+ * The full pipeline against every real article of a sibling jterrazz-web
+ * checkout — the case where an exotic character in a freshly written article
  * would break canonicalization or signing.
  *
- * NB: signs with the Hardhat test key — no real signatures produced.
+ * The content is not this repository's, so no golden can pin it: the oracle
+ * is that the pipeline closes on every file found. Signs with the Hardhat
+ * test key — no real signature is produced.
  */
 
 const CONTENT_DIR = join(process.cwd(), '..', '..', 'content');
@@ -52,47 +54,38 @@ function discoverArticles(): ArticleFile[] {
     return out;
 }
 
-const articles = discoverArticles();
+const ARTICLES = discoverArticles();
 
-describe.skipIf(articles.length === 0)('every real article passes the full pipeline', () => {
-    test.each(articles)(
-        'canonicalize → audit → sign → verify roundtrip survives for $folder ($locale)',
-        async ({ folder, locale, path }) => {
-            const content = readFileSync(path, 'utf8');
-
-            // 1. Canonicalize never throws on legitimate content.
-            const canonical = canonicalize(content);
-            expect(canonical.length).toBeGreaterThan(0);
-
-            // 2. Audit returns a list (suspicious chars, if any). We don't fail here
-            //    Because the user might have legitimate cases — but we report.
-            const findings = audit(canonical);
-            if (findings.length > 0) {
-                process.stderr.write(
-                    `! ${folder}/${locale}.md has ${findings.length} suspicious char(s)\n`,
+describe.skipIf(ARTICLES.length === 0)('every real article passes the full pipeline', () => {
+    test.each(ARTICLES)(
+        'canonicalize → sign → store → verify closes on $folder ($locale)',
+        async ({ locale, folder, path }) => {
+            // Given - one real article read off the sibling checkout
+            const result = await integration.call(async () => {
+                const content = readFileSync(path, 'utf8');
+                const signed = await createAttestation(
+                    {
+                        content,
+                        locale,
+                        publishedAt: new Date('2026-01-01T00:00:00Z'),
+                        slug: folder.toLowerCase().replaceAll(/\s+/gu, '-'),
+                        title: folder,
+                    },
+                    testAccount(),
                 );
-            }
 
-            // 3. Sign with the test wallet.
-            const account = testAccount();
-            const signed = await createAttestation(
-                {
-                    content,
-                    locale,
-                    publishedAt: new Date('2026-01-01T00:00:00Z'),
-                    slug: folder.toLowerCase().replaceAll(/\s+/gu, '-'),
-                    title: folder,
-                },
-                account,
-            );
+                return {
+                    canonicalBytes: canonicalize(content).length,
+                    lossless: stringify(parse(stringify(signed))) === stringify(signed),
+                    verdict: await verifyAttestation({ attestation: signed, content }),
+                };
+            });
 
-            // 4. JSON roundtrip.
-            const json = stringify(signed);
-            expect(parse(json)).toStrictEqual(signed);
-
-            // 5. Verify with original content.
-            const result = await verifyAttestation({ attestation: signed, content });
-            expect(result.ok).toBe(true);
+            // Then - non-empty canonical bytes, a lossless roundtrip, a valid signature
+            expect(result.value.value.canonicalBytes).toBeGreaterThan(0);
+            expect(result.value.value.lossless).toBe(true);
+            expect(result.value.value.verdict.ok).toBe(true);
+            await expect(result.error).toBeEmpty();
         },
     );
 });

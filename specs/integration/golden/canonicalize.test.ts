@@ -1,20 +1,21 @@
 import { createHash } from 'node:crypto';
-import { describe, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 
 import { canonicalize } from '../../../src/primitives/canonicalize.js';
+import { integration } from '../integration.specification.js';
 
 /**
- * Frozen byte-and-digest goldens for canonicalize() v1.
+ * The frozen byte-and-digest goldens for canonicalize() v1.
  *
- * These snapshots are part of the canonicalization v1 contract. If a snapshot
- * changes, EVERY past attestation signed against v1 becomes unverifiable.
- *
- * Update only by introducing CANONICAL_VERSION=2 alongside, never by overwriting.
+ * Every golden here carries `{ frozen: true }`: TEST_UPDATE must never
+ * rewrite one, because a rewrite is exactly the event that makes every
+ * attestation ever signed against v1 unverifiable. A case is retired by
+ * introducing CANONICAL_VERSION=2 alongside v1, never by regenerating.
  */
 
-type Fixture = { name: string; input: string };
+type Case = { name: string; input: string };
 
-const fixtures: Fixture[] = [
+const CASES: Case[] = [
     { input: '', name: '01-empty' },
     { input: '# Hello\n\nWorld.', name: '02-plain-ascii' },
     { input: 'Hello 🦊 fox', name: '03-emoji-4byte-utf8' },
@@ -33,23 +34,31 @@ const fixtures: Fixture[] = [
 
 const sha256Hex = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
 
-describe('canonicalize golden — v1 frozen outputs', () => {
-    test.each(fixtures)('$name → frozen bytes + digest', ({ input }) => {
+test.each(CASES)('$name canonicalizes to the bytes v1 froze', async ({ input, name }) => {
+    // Given - one input of the frozen v1 table, canonicalized
+    const result = await integration.call(() => {
         const bytes = canonicalize(input);
-        const utf8 = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-        const digest = sha256Hex(bytes);
-
-        expect({
+        return {
             byteLength: bytes.length,
-            digest,
-            utf8,
-        }).toMatchSnapshot();
+            digest: sha256Hex(bytes),
+            utf8: new TextDecoder('utf-8', { fatal: true }).decode(bytes),
+        };
     });
 
-    test('decomposed and precomposed NFC forms produce identical bytes', () => {
-        // Two fixtures above represent the same Unicode glyph in different forms.
+    // Then - the length, the digest and the decoded text the contract pins
+    expect(result.value).toMatch(`${name}.json`, { frozen: true });
+    await expect(result.error).toBeEmpty();
+});
+
+test('the two Unicode forms of the same glyph canonicalize to one digest', async () => {
+    // Given - the decomposed and the precomposed spelling of the same word
+    const result = await integration.call(() => {
         const decomposed = canonicalize('café');
         const precomposed = canonicalize('café');
-        expect(decomposed).toStrictEqual(precomposed);
+        return { decomposed: sha256Hex(decomposed), precomposed: sha256Hex(precomposed) };
     });
+
+    // Then - NFC collapsed them before a single byte was hashed
+    expect(result.value.value.decomposed).toBe(result.value.value.precomposed);
+    await expect(result.error).toBeEmpty();
 });

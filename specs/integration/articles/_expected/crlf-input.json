@@ -1,0 +1,22 @@
+{
+    "record": {
+        "claims": {
+            "priorAttestation": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "publishedAt": "1778284800",
+            "revision": 1,
+            "slug": "crlf-input"
+        },
+        "schemaVersion": 1,
+        "signature": "0xa39ba015ca644062f14bbde1487c83ed1f19169b41f5f994156d76e23858917b6e971a943d1a522a1f7f6b768ffc807d4b0f54514c6fe3994a9a0ed868727e991c",
+        "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "subject": {
+            "contentDigest": "0x880553fca8fcea94e325ee2cfb48e5a985cc797f39a14cc6d3cedecfeb2ae4d2",
+            "locale": "en",
+            "title": "Test article crlf-input"
+        }
+    },
+    "verdict": {
+        "ok": true,
+        "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+    }
+}

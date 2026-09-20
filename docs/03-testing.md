@@ -34,13 +34,17 @@ specs/integration/
     └── ots-stamp.test.ts
 ```
 
-`specs/integration/integration.specification.ts` declares no `services`: nothing this package integrates with is a container. It is the golden half of the facet: what earns a spec its place here is its ORACLE — a frozen file, a real article tree, a real calendar — never the amount of machinery it starts.
+`specs/integration/integration.specification.ts` declares no `services`: nothing this package integrates with is a container. It is the golden half of the facet — what earns a spec its place here is its ORACLE, never the amount of machinery it starts.
+
+Every spec calls its module through `integration.call(…)`, so what the module returned reads as `result.value` and what it threw as `result.error`: a refusal is specified the same size as a success, with no `try`/`catch` in the test.
 
 ## What a golden pins
 
-`specs/integration/golden/` holds the exact bytes and digests that v1 produces for a fixed set of inputs: the empty string, CRLF, a leading BOM, combining versus precomposed diacritics, RTL text, emoji, code-block whitespace, and one frozen article signed with the Hardhat test wallet. These ARE the v1 contract: if one changes, every attestation ever signed against v1 becomes unverifiable.
+A golden is a file under a domain's `_expected/`, compared whole by `expect(result.value).toMatch('<name>.<ext>')` — `.json` when the module returned a value, `.txt` when it returned a string. `TEST_UPDATE=1` rewrites a mismatching one from the actual output.
 
-A golden here is updated only by introducing `CANONICAL_VERSION = 2` alongside v1, never by regenerating it in place — see [05-signing-and-anchoring.md](05-signing-and-anchoring.md).
+Which is exactly what must never happen here, so every golden of this package carries `{ frozen: true }`: update mode refuses to write it, and a mismatch throws its diff instead. The twenty-four of them are the v1 contract — the bytes and digest `canonicalize()` produces for the empty string, CRLF, a leading BOM, combining versus precomposed diacritics, RTL text, emoji and code-block whitespace; the EIP-712 type table and the digest it hashes to; the signature, the serialized document and the verdict of one frozen article; and the stored record of five more. If one changes, every attestation ever signed against v1 becomes unverifiable.
+
+A golden here is retired only by introducing `CANONICAL_VERSION = 2` alongside v1, never by regenerating it in place — see [05-signing-and-anchoring.md](05-signing-and-anchoring.md). Dropping `{ frozen: true }` for one `TEST_UPDATE=1` run is how a NEW case is written, and the flag goes straight back.
 
 ## `articles/pipeline.test.ts` is optional by design
 

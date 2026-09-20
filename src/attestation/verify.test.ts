@@ -142,6 +142,7 @@ describe('verifyAttestation — rejection paths', () => {
 
 describe('verifyAttestation — tampering with a signed subject', () => {
     test('rejects after the title has been rewritten', async () => {
+        // Given - a signed attestation whose title was swapped after signing
         const account = testAccount();
         const signed = await createAttestation(baseInput, account);
 
@@ -155,6 +156,7 @@ describe('verifyAttestation — tampering with a signed subject', () => {
             content: baseInput.content,
         });
 
+        // Then - the signature recovers to another signer
         expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
@@ -162,6 +164,7 @@ describe('verifyAttestation — tampering with a signed subject', () => {
     });
 
     test('rejects after the publishedAt timestamp has been moved', async () => {
+        // Given - a signed attestation moved on by one second after signing
         const account = testAccount();
         const signed = await createAttestation(baseInput, account);
 
@@ -175,6 +178,7 @@ describe('verifyAttestation — tampering with a signed subject', () => {
             content: baseInput.content,
         });
 
+        // Then - the signature recovers to another signer
         expect(result.ok).toBe(false);
         if (!result.ok) {
             expect(result.error.kind).toBe('signer-mismatch');
