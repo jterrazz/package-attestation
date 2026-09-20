@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, test } from 'vitest';
 
-import { stampDigest } from '../../src/ots/stamp.js';
-import { verifyOts } from '../../src/ots/verify.js';
+import { stampDigest } from '../../../src/ots/stamp.js';
+import { verifyOts } from '../../../src/ots/verify.js';
 
 /**
  * Live OTS network test. Gated behind ATTEST_E2E_NETWORK=1, run via `make test-network`.

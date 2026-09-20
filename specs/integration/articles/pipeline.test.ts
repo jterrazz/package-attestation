@@ -2,12 +2,12 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { createAttestation } from '../../src/attestation/create.js';
-import { parse, stringify } from '../../src/attestation/serialize.js';
-import { verifyAttestation } from '../../src/attestation/verify.js';
-import { audit } from '../../src/primitives/audit.js';
-import { canonicalize } from '../../src/primitives/canonicalize.js';
-import { testAccount } from '../setup/test-wallet.js';
+import { createAttestation } from '../../../src/attestation/create.js';
+import { parse, stringify } from '../../../src/attestation/serialize.js';
+import { verifyAttestation } from '../../../src/attestation/verify.js';
+import { testAccount } from '../../../src/attestation/wallet.fixtures.js';
+import { audit } from '../../../src/primitives/audit.js';
+import { canonicalize } from '../../../src/primitives/canonicalize.js';
 
 /**
  * Runs the full attestation pipeline against every real article in jterrazz-web.

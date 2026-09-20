@@ -10,7 +10,7 @@ make build           # tsdown → dist/
 make lint            # typescript check — every quality gate, in parallel
 make lint-fix        # typescript fix
 make test            # vitest --run (offline projects only)
-make test-network    # + the OpenTimestamps-calendar e2e project
+make test-network    # + the live OpenTimestamps-calendar folder
 make clean           # rm -rf .artifacts dist
 ```
 
@@ -33,14 +33,14 @@ A module's home is one of the six folders in [01-architecture.md](01-architectur
 - The wallet-signing HTTP flow (`src/eth/`) is Node-only and exported from `src/node.ts`.
 - A CLI subcommand's parsing and terminal output go in `src/cli/`; the command dispatch table is `src/cli/index.ts`.
 
-A module's unit test is its sibling (`create.ts` / `create.test.ts`); a test that proves something across modules goes under `tests/` — which suite, in [03-testing.md](03-testing.md).
+A module's unit test is its sibling (`create.ts` / `create.test.ts`); a test whose oracle is a frozen file, a real article tree or a real calendar is an integration spec under `specs/integration/` — which domain, in [03-testing.md](03-testing.md). A helper two tests share is a `*.fixtures.ts` beside the code it builds, never an import from one test file into another: `src/attestation/wallet.fixtures.ts` is the signing wallet every suite uses.
 
 ## Conventions a change must keep
 
 - **The frozen contract never moves.** `CANONICAL_VERSION` and `SCHEMA_VERSION` (`src/version.ts`) are each bumped only by adding a new version alongside the old one — never by editing `canonicalize()` or the EIP-712 schema in place. A verifier for the old version must keep working. See [05-signing-and-anchoring.md](05-signing-and-anchoring.md).
 - **`src/primitives/` is named after what it holds.** The toolchain's Names (tree) pass refuses `core`, `shared`, `utils` and the seven other words that say nothing about a directory's subject.
 - **`.npmrc` sets `allow-git=all` deliberately** — `javascript-opentimestamps` is pinned to a git ref in `package.json`, and npm refuses a git dependency without it. Do not remove the line.
-- **Offline by default.** `npm test` never touches the network. Anything that calls an OpenTimestamps calendar or a Bitcoin block-info source lives behind the `e2e-network` project, gated by `ATTEST_E2E_NETWORK=1` (`npm run test:network`).
+- **Offline by default.** `npm test` never touches the network. Anything that calls an OpenTimestamps calendar or a Bitcoin block-info source lives under `specs/integration/network/`, which the `integration` project collects only when `ATTEST_E2E_NETWORK=1` (`npm run test:network`).
 - **Audit runs at sign time only.** `src/primitives/audit.ts` is advice for the author signing a file, never a rule `verifyAttestation` applies — a verifier is a pure function of `canonicalize()` alone, and adding a stricter check there would make an old, honestly-signed attestation fail a newer verifier.
 
 ## Related

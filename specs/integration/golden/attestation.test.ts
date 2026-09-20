@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { createAttestation } from '../../src/attestation/create.js';
-import { stringify } from '../../src/attestation/serialize.js';
-import { verifyAttestation } from '../../src/attestation/verify.js';
-import { TEST_ADDRESS, testAccount } from '../setup/test-wallet.js';
+import { createAttestation } from '../../../src/attestation/create.js';
+import { stringify } from '../../../src/attestation/serialize.js';
+import { verifyAttestation } from '../../../src/attestation/verify.js';
+import { TEST_ADDRESS, testAccount } from '../../../src/attestation/wallet.fixtures.js';
 
 /**
  * Attestation golden — full pipeline with the Hardhat test wallet.

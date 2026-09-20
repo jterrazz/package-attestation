@@ -10,7 +10,7 @@ The corpus is `docs/` + `README.md`, mapped by [docs/README.md](docs/README.md).
 | ----------------------------------------------------- | ---------------------------------- |
 | The four entries, the layers, the browser boundary    | `docs/01-architecture.md`          |
 | The toolchain, where a new file goes, the conventions | `docs/02-developing.md`            |
-| The five test projects, what a golden pins            | `docs/03-testing.md`               |
+| The two test projects, what a golden pins             | `docs/03-testing.md`               |
 | The release, and which number moves                   | `docs/04-operating.md`             |
 | Canonicalization, EIP-712, signing, OTS anchoring     | `docs/05-signing-and-anchoring.md` |
 

@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { testAccount } from '../../tests/setup/test-wallet.js';
 import { createAttestation } from '../attestation/create.js';
 import { stringify } from '../attestation/serialize.js';
+import { testAccount } from '../attestation/wallet.fixtures.js';
 import { verifyFromUrl } from './verify-from-url.js';
 
 describe('verifyFromUrl — end-to-end with mocked fetch', () => {
