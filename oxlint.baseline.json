@@ -1,7 +1,7 @@
 {
     "eslint/no-await-in-loop": 3,
     "eslint/no-use-before-define": 2,
-    "jterrazz/b4-given-then": 174,
+    "jterrazz/b4-given-then": 144,
     "promise/avoid-new": 2,
     "promise/prefer-await-to-then": 1,
     "typescript/no-unsafe-type-assertion": 28,
@@ -9,5 +9,5 @@
     "unicorn/no-process-exit": 1,
     "unicorn/prefer-code-point": 5,
     "unicorn/prefer-top-level-await": 1,
-    "vitest/no-conditional-expect": 19
+    "vitest/no-conditional-expect": 16
 }
