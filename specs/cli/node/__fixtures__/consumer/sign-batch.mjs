@@ -5,7 +5,7 @@ import { article } from './wallet.mjs';
 
 const entries = [
     { id: 'first', label: 'First article', message: buildAttestationMessage(article) },
-    { id: 'second', label: 'Second </script> article', message: buildAttestationMessage({ ...article, slug: 'second' }) },
+    { id: 'second', label: 'Second </script> article ${1+1}', message: buildAttestationMessage({ ...article, slug: 'second' }) },
 ];
 const signature = `0x${'ab'.repeat(65)}`;
 const signerAddress = `0x${'cd'.repeat(20)}`;
@@ -50,6 +50,8 @@ const result = await signBatchViaBrowser({
 // The last answer the page reads may arrive after the flow settles: the walk is awaited before anything is printed.
 await walking;
 process.stdout.write(`${lines.join('\n')}\n`);
+const payload = /<script type="application\/json" id="entries-data">([\s\S]*?)<\/script>/u.exec(page)[1];
+process.stdout.write(`labels the page reads: ${JSON.parse(payload).map(({ label }) => label).join(' | ')}\n`);
 process.stdout.write(`signatures: ${JSON.stringify([...result.signatures])}\nskipped: ${JSON.stringify([...result.skipped])}\n`);
 process.stdout.write(`${page}\n`);
 

@@ -1,4 +1,4 @@
-import { embeddedJson } from './embedded-json.js';
+import { jsonScript } from './json-script.js';
 
 const BEFORE_THE_DATA = `<!doctype html>
 <html lang="en">
@@ -19,10 +19,11 @@ const BEFORE_THE_DATA = `<!doctype html>
 <pre id="preview"></pre>
 <p><button id="sign">Sign with wallet</button></p>
 <p id="status"></p>
-<script>
-    const TYPED_DATA = JSON.parse(\``;
+`;
 
-const AFTER_THE_DATA = `\`);
+const AFTER_THE_DATA = `
+<script>
+    const TYPED_DATA = JSON.parse(document.getElementById('typed-data').textContent);
     document.getElementById('preview').textContent = JSON.stringify(TYPED_DATA.message, null, 2);
 
     document.getElementById('sign').addEventListener('click', async () => {
@@ -68,5 +69,5 @@ const AFTER_THE_DATA = `\`);
 
 /** The page the CLI's loopback server shows: the typed data, and a button that asks the browser's wallet (`window.ethereum`) for an EIP-712 v4 signature, posted back to `/done`. No script is loaded, so what reaches the wallet reads in the page source. */
 export function buildSignPageHtml(typedDataJson: string): string {
-    return `${BEFORE_THE_DATA}${embeddedJson(typedDataJson)}${AFTER_THE_DATA}`;
+    return `${BEFORE_THE_DATA}${jsonScript('typed-data', typedDataJson)}${AFTER_THE_DATA}`;
 }

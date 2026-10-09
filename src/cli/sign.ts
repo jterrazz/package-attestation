@@ -4,6 +4,7 @@ import { hexToBytes } from 'viem';
 
 import { buildAttestationMessage } from '../attestation/create.js';
 import { stringify } from '../attestation/serialize.js';
+import { verifyAttestation } from '../attestation/verify.js';
 import { signViaBrowser } from '../eth/sign-flow.js';
 import { stampDigest } from '../ots/stamp.js';
 import { audit } from '../primitives/audit.js';
@@ -46,11 +47,17 @@ export async function runSign(args: SignArgs): Promise<void> {
     process.stdout.write(`${fmt.info('→')} Content digest: ${message.subject.contentDigest}\n`);
     process.stdout.write(`${fmt.info('→')} Opening browser to sign with your wallet…\n`);
 
-    const signature = await signViaBrowser({ message });
-    process.stdout.write(`${checkmark()} Signed by ${fmt.bold(signature.signerAddress)}\n`);
+    const signed = { ...message, ...(await signViaBrowser({ message })) };
+    const verdict = await verifyAttestation({ attestation: signed, content });
+    if (!verdict.ok) {
+        throw new Error(
+            `The wallet's signature does not verify (${verdict.error.kind}): nothing was written.`,
+        );
+    }
+    process.stdout.write(`${checkmark()} Signed by ${fmt.bold(signed.signerAddress)}\n`);
 
     const stem = join(dirname(args.file), basename(args.file, extname(args.file)));
-    await writeFile(`${stem}.attestation.json`, stringify({ ...message, ...signature }));
+    await writeFile(`${stem}.attestation.json`, stringify(signed));
     process.stdout.write(`${checkmark()} Wrote ${stem}.attestation.json\n`);
 
     if (args.skipStamp !== true) {

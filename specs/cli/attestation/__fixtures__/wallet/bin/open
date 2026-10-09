@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// outside: stands in for the browser and its wallet on PATH — it reads the typed data the opened page serves, signs it with Hardhat's account, and posts the signature back.
+// outside: stands in for the browser and its wallet on PATH — it reads the typed data the opened page serves, signs it with Hardhat's account, and posts the signature back; CLAIMED_SIGNER makes it claim another address than the one that signed.
 import { hardhatAccount } from '../hardhat.mjs';
 
 const url = process.argv.at(-1);
 const page = await (await fetch(url)).text();
-const literal = /JSON\.parse\(`([\s\S]*?)`\)/u.exec(page)[1];
-const { domain, message, primaryType, types } = JSON.parse(new Function(`return \`${literal}\`;`)());
+const served = /<script type="application\/json" id="typed-data">([\s\S]*?)<\/script>/u.exec(page)[1];
+const { domain, message, primaryType, types } = JSON.parse(served);
 const { EIP712Domain, ...structs } = types;
 const signature = await hardhatAccount.signTypedData({
     domain,
@@ -13,4 +13,5 @@ const signature = await hardhatAccount.signTypedData({
     primaryType,
     types: structs,
 });
-await fetch(new URL('/done', url), { body: JSON.stringify({ signature, signerAddress: hardhatAccount.address }), method: 'POST' });
+const signerAddress = process.env.CLAIMED_SIGNER ?? hardhatAccount.address;
+await fetch(new URL('/done', url), { body: JSON.stringify({ signature, signerAddress }), method: 'POST' });

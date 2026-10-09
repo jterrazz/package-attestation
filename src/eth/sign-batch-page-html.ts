@@ -1,4 +1,4 @@
-import { embeddedJson } from './embedded-json.js';
+import { jsonScript } from './json-script.js';
 
 const BEFORE_THE_DATA = `<!doctype html>
 <html lang="en">
@@ -37,10 +37,11 @@ const BEFORE_THE_DATA = `<!doctype html>
     <span class="progress" id="progress"></span>
 </div>
 <ul class="entries" id="entries"></ul>
-<script>
-    const ENTRIES = JSON.parse(\``;
+`;
 
-const AFTER_THE_DATA = `\`);
+const AFTER_THE_DATA = `
+<script>
+    const ENTRIES = JSON.parse(document.getElementById('entries-data').textContent);
     const ul = document.getElementById('entries');
     const lead = document.getElementById('lead');
     const progress = document.getElementById('progress');
@@ -141,5 +142,5 @@ const AFTER_THE_DATA = `\`);
 export function buildBatchSignPageHtml(
     entries: { id: string; label: string; typedData: object }[],
 ): string {
-    return `${BEFORE_THE_DATA}${embeddedJson(JSON.stringify(entries))}${AFTER_THE_DATA}`;
+    return `${BEFORE_THE_DATA}${jsonScript('entries-data', JSON.stringify(entries))}${AFTER_THE_DATA}`;
 }

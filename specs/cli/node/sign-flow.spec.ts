@@ -33,6 +33,7 @@ describe('sign-flow', () => {
             POST /done → 400 text/plain "Invalid payload"
             POST /done → 200 text/plain "OK"
             resolved: {"signature":"0xababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab","signerAddress":"0xCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCd"}
+            the slug the page reads: a\`b\\c</script>d<!-- \${1+1} \${globalThis.pwned=7}
             after the flow: the server is closed
             <!doctype html>
             <html lang="en">
@@ -53,8 +54,9 @@ describe('sign-flow', () => {
             <pre id="preview"></pre>
             <p><button id="sign">Sign with wallet</button></p>
             <p id="status"></p>
+            <script type="application/json" id="typed-data">{"domain":{"chainId":1,"name":"jterrazz.com Article Attestation","version":"1"},"message":{"claims":{"priorAttestation":"0x0000000000000000000000000000000000000000000000000000000000000000","publishedAt":"1778284800","revision":1,"slug":"a\`b\\\\c\\u003c/script>d\\u003c!-- \${1+1} \${globalThis.pwned=7}"},"schemaVersion":1,"subject":{"contentDigest":"0xd2d62011d0490067d3250f2b34e65c9397cabe2bd6dc5081129e3e7408c9e8c2","locale":"en","title":"Hello World"}},"primaryType":"Attestation","types":{"EIP712Domain":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"chainId","type":"uint256"}],"Attestation":[{"name":"schemaVersion","type":"uint16"},{"name":"subject","type":"ArticleSubject"},{"name":"claims","type":"ArticleClaims"}],"ArticleClaims":[{"name":"slug","type":"string"},{"name":"publishedAt","type":"uint64"},{"name":"revision","type":"uint16"},{"name":"priorAttestation","type":"bytes32"}],"ArticleSubject":[{"name":"title","type":"string"},{"name":"contentDigest","type":"bytes32"},{"name":"locale","type":"string"}]}}</script>
             <script>
-                const TYPED_DATA = JSON.parse(\`{"domain":{"chainId":1,"name":"jterrazz.com Article Attestation","version":"1"},"message":{"claims":{"priorAttestation":"0x0000000000000000000000000000000000000000000000000000000000000000","publishedAt":"1778284800","revision":1,"slug":"a\\\`b\\\\\\\\c<\\/script>d"},"schemaVersion":1,"subject":{"contentDigest":"0xd2d62011d0490067d3250f2b34e65c9397cabe2bd6dc5081129e3e7408c9e8c2","locale":"en","title":"Hello World"}},"primaryType":"Attestation","types":{"EIP712Domain":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"chainId","type":"uint256"}],"Attestation":[{"name":"schemaVersion","type":"uint16"},{"name":"subject","type":"ArticleSubject"},{"name":"claims","type":"ArticleClaims"}],"ArticleClaims":[{"name":"slug","type":"string"},{"name":"publishedAt","type":"uint64"},{"name":"revision","type":"uint16"},{"name":"priorAttestation","type":"bytes32"}],"ArticleSubject":[{"name":"title","type":"string"},{"name":"contentDigest","type":"bytes32"},{"name":"locale","type":"string"}]}}\`);
+                const TYPED_DATA = JSON.parse(document.getElementById('typed-data').textContent);
                 document.getElementById('preview').textContent = JSON.stringify(TYPED_DATA.message, null, 2);
 
                 document.getElementById('sign').addEventListener('click', async () => {

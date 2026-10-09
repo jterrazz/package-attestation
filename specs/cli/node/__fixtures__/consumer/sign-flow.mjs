@@ -3,7 +3,7 @@ import { signViaBrowser } from '@jterrazz/attestation/node';
 
 import { article } from './wallet.mjs';
 
-const message = buildAttestationMessage({ ...article, slug: 'a`b\\c</script>d' });
+const message = buildAttestationMessage({ ...article, slug: 'a`b\\c</script>d<!-- ${1+1} ${globalThis.pwned=7}' });
 const signature = `0x${'ab'.repeat(65)}`;
 const signerAddress = `0x${'Cd'.repeat(20)}`;
 
@@ -48,7 +48,9 @@ const result = await signViaBrowser({
 });
 // The last answer the page reads may arrive after the flow settles: the walk is awaited before anything is printed.
 await walking;
+const payload = /<script type="application\/json" id="typed-data">([\s\S]*?)<\/script>/u.exec(page)[1];
 process.stdout.write(`${lines.join('\n')}\nresolved: ${JSON.stringify(result)}\n`);
+process.stdout.write(`the slug the page reads: ${JSON.parse(payload).message.claims.slug}\n`);
 await fetch(served).then(
     (response) => process.stdout.write(`after the flow: still answering ${response.status}\n`),
     () => process.stdout.write('after the flow: the server is closed\n'),

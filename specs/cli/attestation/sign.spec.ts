@@ -103,6 +103,60 @@ describe('sign', () => {
         `);
     });
 
+    test('signs a title holding template syntax as written, never as code the page runs', async () => {
+        // Given - a title that would interpolate inside a JavaScript template literal
+        const result = await cli
+            .link('@jterrazz/attestation', packed())
+            .fixture(directory('./__fixtures__/wallet/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
+            .fixture(directory('./__fixtures__/article/'))
+            .env(HEADLESS)
+            .exec(
+                'node_modules/.bin/attestation sign en.md --title \'Cost ${1+1} and ${globalThis.pwned=7}\' --slug s --published-at 2024-05-09T00:00:00Z --skip-stamp',
+            );
+
+        // Then - the title signed and written is the one given, character for character
+        expect(result.exitCode).toBe(0);
+        expect(text(result.file('en.attestation.json').content)).toMatch(`
+            {
+              "claims": {
+                "priorAttestation": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "publishedAt": "1715212800",
+                "revision": 1,
+                "slug": "s"
+              },
+              "schemaVersion": 1,
+              "signature": "0xf892c83ab40c348881b557f27f9f15dd7c7873c57248173b3ad0f417e5cf0b9d146135157e2e1b3e2b313cb9ce7e7187429704e618a1651deb43cccf550383d11c",
+              "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+              "subject": {
+                "contentDigest": "0x0c756fb254e676df5d0c429a6d7120a86ab9dfff689c6ad913fd53811b9dd1fe",
+                "locale": "en",
+                "title": "Cost \${1+1} and \${globalThis.pwned=7}"
+              }
+            }
+        `);
+    });
+
+    test('refuses a signature that does not recover to the signer the wallet claims, and writes nothing', async () => {
+        // Given - a wallet that signs with one account and claims another
+        const result = await cli
+            .link('@jterrazz/attestation', packed())
+            .fixture(directory('./__fixtures__/wallet/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
+            .fixture(directory('./__fixtures__/article/'))
+            .env({ ...HEADLESS, CLAIMED_SIGNER: `0x${'cd'.repeat(20)}` })
+            .exec(
+                'node_modules/.bin/attestation sign en.md --title T --slug s --published-at 2024-05-09T00:00:00Z --skip-stamp',
+            );
+
+        // Then - the refusal, and no attestation
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(`
+            Error: The wallet's signature does not verify (signer-mismatch): nothing was written.
+        `);
+        expect(result.file('en.attestation.json').exists).toBe(false);
+    });
+
     test('dates an article now when no date is given', async () => {
         // Given - an article signed with no --published-at
         const result = await cli
