@@ -21,20 +21,24 @@ No markdown parsing, no per-line trim, no tab-to-space substitution, no interior
 
 `buildAttestationMessage()` (`src/attestation/create.ts`) canonicalizes the content, SHA-256-hashes it (`sha256Hex`), and assembles the EIP-712 typed message (`src/primitives/eip712-schema.ts`):
 
-| Field                     | Meaning                                                                                                                                |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `schemaVersion`           | `SCHEMA_VERSION`, frozen the same way as `CANONICAL_VERSION`                                                                           |
-| `subject.title`           | The article title, part of what is signed                                                                                              |
-| `subject.contentDigest`   | SHA-256 of the canonical bytes                                                                                                         |
-| `subject.locale`          | The article's locale                                                                                                                   |
-| `claims.slug`             | The article's slug                                                                                                                     |
-| `claims.publishedAt`      | Unix seconds                                                                                                                           |
-| `claims.revision`         | Starts at 1                                                                                                                            |
-| `claims.priorAttestation` | `NO_PRIOR_ATTESTATION` for a first revision, else the previous attestation's reference — the digest chain that links an edit's history |
+| Field                     | Meaning                                                                                                                                                                 |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schemaVersion`           | `SCHEMA_VERSION`, frozen the same way as `CANONICAL_VERSION`                                                                                                            |
+| `subject.title`           | The article title, part of what is signed                                                                                                                               |
+| `subject.contentDigest`   | SHA-256 of the canonical bytes                                                                                                                                          |
+| `subject.locale`          | The article's locale                                                                                                                                                    |
+| `claims.slug`             | The article's slug                                                                                                                                                      |
+| `claims.publishedAt`      | Unix seconds                                                                                                                                                            |
+| `claims.revision`         | Starts at 1                                                                                                                                                             |
+| `claims.priorAttestation` | `NO_PRIOR_ATTESTATION` for a first revision, else the [attestation digest](#the-attestation-digest) of the revision it follows — the chain that links an edit's history |
 
 The domain (`ATTESTATION_DOMAIN_V1`) pins `chainId: 1`, so a signature is scoped to this scheme and cannot be replayed as a signature over an unrelated EIP-712 message on the same chain. `signAttestation()` calls a viem `LocalAccount`'s `signTypedData`; the CLI never holds a private key itself — see § Two ways to sign below.
 
 `toStored`/`fromStored`/`stringify`/`parse` (`src/attestation/serialize.ts`) are the only conversion between the in-memory `SignedAttestation` (a `bigint` `publishedAt`) and the on-disk `StoredAttestation` JSON (`publishedAt` as a string, since JSON has no bigint) — the `<article>.attestation.json` file. `parse` refuses a document missing a member or holding one of the wrong type with a `TypeError`, and leaves out any member the record does not have; whether the document is authentic is `verifyAttestation`'s to say.
+
+### The attestation digest
+
+A revision names the one it follows by its attestation digest: `attestationDigest()` (`src/attestation/digest.ts`, exported from `.` and `./browser`) — the EIP-712 `hashTypedData` of the attestation's message under `ATTESTATION_DOMAIN_V1`, the very 32-byte hash its author signed. It is computed over the typed message, never over the JSON file, so a record re-serialized, re-indented or read back with `parse` keeps its digest; the signature and the signer are not part of it. `attestation sign` prints it after writing the attestation, ready for the next revision's `--prior-attestation`; for a record signed earlier, `attestationDigest(parse(json))` gives the same value.
 
 ## 3. Verify
 

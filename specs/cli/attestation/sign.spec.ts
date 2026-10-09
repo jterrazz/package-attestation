@@ -50,6 +50,7 @@ describe('sign', () => {
             → Opening browser to sign with your wallet…
             ✓ Signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             ✓ Wrote en.attestation.json
+            → Attestation digest (a next revision's --prior-attestation): 0x129fbbdceeaf6ee2b4f00d741c2ebd3ae059ce79ecf85e8689ab425111c37937
         `);
         expect(text(result.file('en.attestation.json').content)).toMatch(`
             {
@@ -177,6 +178,7 @@ describe('sign', () => {
             → Opening browser to sign with your wallet…
             ✓ Signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             ✓ Wrote en.attestation.json
+            → Attestation digest (a next revision's --prior-attestation): 0x{{sha}}
         `);
     });
 
@@ -200,6 +202,7 @@ describe('sign', () => {
             → Opening browser to sign with your wallet…
             ✓ Signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             ✓ Wrote en.attestation.json
+            → Attestation digest (a next revision's --prior-attestation): 0xd00daef9022552a175f58f59e74d443b03475b7c93989cda264870191ade093c
             → Submitting to OpenTimestamps calendars…
             Submitting to remote calendar https://a.pool.opentimestamps.org
             Submitting to remote calendar https://b.pool.opentimestamps.org
@@ -322,17 +325,17 @@ describe('sign', () => {
         {
             argv: `en.md --title T --slug s --prior-attestation 0x12`,
             label: 'a prior attestation that is no digest',
-            refusal: `found: --prior-attestation 0x12 is no 32-byte digest · why: the prior attestation is signed as a bytes32 · fix: give 0x and 64 hex digits, the digest of the attestation this revision follows · read: ${READ}sign`,
+            refusal: `found: --prior-attestation 0x12 is no 32-byte digest · why: the prior attestation is signed as a bytes32 · fix: give the attestation digest \`sign\` printed for the revision this one follows: 0x and 64 hex digits · read: ${READ}sign`,
         },
         {
             argv: `en.md --title T --slug s --prior-attestation x${PRIOR}`,
             label: 'a prior attestation behind a prefix',
-            refusal: `found: --prior-attestation x${PRIOR} is no 32-byte digest · why: the prior attestation is signed as a bytes32 · fix: give 0x and 64 hex digits, the digest of the attestation this revision follows · read: ${READ}sign`,
+            refusal: `found: --prior-attestation x${PRIOR} is no 32-byte digest · why: the prior attestation is signed as a bytes32 · fix: give the attestation digest \`sign\` printed for the revision this one follows: 0x and 64 hex digits · read: ${READ}sign`,
         },
         {
             argv: `en.md --title T --slug s --prior-attestation ${PRIOR}ff`,
             label: 'a prior attestation one byte too long',
-            refusal: `found: --prior-attestation ${PRIOR}ff is no 32-byte digest · why: the prior attestation is signed as a bytes32 · fix: give 0x and 64 hex digits, the digest of the attestation this revision follows · read: ${READ}sign`,
+            refusal: `found: --prior-attestation ${PRIOR}ff is no 32-byte digest · why: the prior attestation is signed as a bytes32 · fix: give the attestation digest \`sign\` printed for the revision this one follows: 0x and 64 hex digits · read: ${READ}sign`,
         },
         {
             argv: `en.md --title T --slug s --published-at yesterday`,

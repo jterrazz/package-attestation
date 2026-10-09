@@ -143,7 +143,7 @@ function hexOf(value: string | undefined): `0x${string}` | undefined {
     }
     if (!/^0x[\dA-Fa-f]{64}$/u.test(value)) {
         throw new RefusalError({
-            fix: 'give 0x and 64 hex digits, the digest of the attestation this revision follows',
+            fix: 'give the attestation digest `sign` printed for the revision this one follows: 0x and 64 hex digits',
             found: `--prior-attestation ${value} is no 32-byte digest`,
             read: 'sign',
             why: 'the prior attestation is signed as a bytes32',

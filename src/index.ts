@@ -18,6 +18,7 @@ export {
     type CreateAttestationInput,
     signAttestation,
 } from './attestation/create.js';
+export { attestationDigest } from './attestation/digest.js';
 export { type SignedAttestation, type StoredAttestation } from './attestation/record.js';
 export { fromStored, parse, stringify, toStored } from './attestation/serialize.js';
 export {

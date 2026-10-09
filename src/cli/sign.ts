@@ -3,6 +3,7 @@ import { basename, dirname, extname, join } from 'node:path';
 import { hexToBytes } from 'viem';
 
 import { buildAttestationMessage } from '../attestation/create.js';
+import { attestationDigest } from '../attestation/digest.js';
 import { stringify } from '../attestation/serialize.js';
 import { verifyAttestation } from '../attestation/verify.js';
 import { signViaBrowser } from '../eth/sign-flow.js';
@@ -68,6 +69,9 @@ export async function runSign(args: SignArgs): Promise<void> {
     const stem = join(dirname(args.file), basename(args.file, extname(args.file)));
     await writeFile(`${stem}.attestation.json`, stringify(signed));
     process.stdout.write(`${checkmark()} Wrote ${stem}.attestation.json\n`);
+    process.stdout.write(
+        `${fmt.info('→')} Attestation digest (a next revision's --prior-attestation): ${attestationDigest(signed)}\n`,
+    );
 
     if (args.skipStamp !== true) {
         process.stdout.write(`${fmt.info('→')} Submitting to OpenTimestamps calendars…\n`);

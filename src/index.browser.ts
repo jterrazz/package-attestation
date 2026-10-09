@@ -12,6 +12,7 @@ export {
 } from './primitives/eip712-schema.js';
 
 export { buildAttestationMessage, type CreateAttestationInput } from './attestation/create.js';
+export { attestationDigest } from './attestation/digest.js';
 export { type SignedAttestation, type StoredAttestation } from './attestation/record.js';
 export { fromStored, parse, stringify, toStored } from './attestation/serialize.js';
 export {

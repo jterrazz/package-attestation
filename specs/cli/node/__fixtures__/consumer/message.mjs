@@ -1,4 +1,5 @@
 import {
+    attestationDigest,
     buildAttestationMessage,
     CANONICAL_VERSION,
     createAttestation,
@@ -25,3 +26,8 @@ print('LF and CRLF content', { crlf, lf });
 const signed = await createAttestation(article, wallet);
 print('signed', { signature: signed.signature, signerAddress: signed.signerAddress });
 print('signed in two steps', await signAttestation(buildAttestationMessage(article), wallet));
+
+const first = buildAttestationMessage(article);
+const next = buildAttestationMessage({ ...article, priorAttestation: attestationDigest(first), revision: 2, title: 'Hello Again' });
+print('the digest of a message, and of the record signed over it', { message: attestationDigest(first), signed: attestationDigest(signed) });
+print('a later revision chained to it', next.claims);

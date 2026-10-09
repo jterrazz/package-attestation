@@ -25,7 +25,7 @@ An attestation proves an article existed, unmodified, at a point in time, signed
 
 - **Canonicalize before digesting** — the signature covers the canonical form, not the raw file. `CANONICAL_VERSION`/`SCHEMA_VERSION` are versioned: changing either means a new version that still verifies the old ones.
 - **The browser entry stays runtime-agnostic** — never add a Node-only import there; the export map is the boundary.
-- **The digest chain** — `claims.priorAttestation` links revisions (`NO_PRIOR_ATTESTATION` for the first, `claims.revision` counting from 1); a retitle or an edit re-signs with the previous attestation as prior (`--revision`, `--prior-attestation`).
+- **The digest chain** — `claims.priorAttestation` links revisions (`NO_PRIOR_ATTESTATION` for the first, `claims.revision` counting from 1); a retitle or an edit re-signs with the previous revision's `attestationDigest()` as prior (`--revision`, `--prior-attestation`; `sign` prints the digest) — defined in `docs/concepts/signing-and-anchoring.md` § The attestation digest.
 - Signature verification is offline; stamping and upgrading talk to the OpenTimestamps calendars, and the Bitcoin date to a block explorer (`explorerUrl` / `--explorer` names your own). `parse` refuses a document that is no stored attestation.
 
 ## Reference consumer

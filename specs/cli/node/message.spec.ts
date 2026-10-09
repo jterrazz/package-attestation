@@ -24,6 +24,8 @@ describe('message', () => {
             LF and CRLF content: {"crlf":"0x82d9cea061666a99f9dbf919e2dc6288ce7da4f7eba71997c0ae3af46f0732bb","lf":"0x82d9cea061666a99f9dbf919e2dc6288ce7da4f7eba71997c0ae3af46f0732bb"}
             signed: {"signature":"0xcc3d204c1a4dbd1b4f45c1784f37b907eeae8d11323c88824a6409b7fd4dbfaf11eac61445c99cd4135e861e5e13d61de5bbfe754d804538a1ab5ad5c0b3d0171c","signerAddress":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"}
             signed in two steps: {"claims":{"priorAttestation":"0x0000000000000000000000000000000000000000000000000000000000000000","publishedAt":"1778284800n","revision":1,"slug":"hello-world"},"schemaVersion":1,"subject":{"contentDigest":"0xd2d62011d0490067d3250f2b34e65c9397cabe2bd6dc5081129e3e7408c9e8c2","locale":"en","title":"Hello World"},"signature":"0xcc3d204c1a4dbd1b4f45c1784f37b907eeae8d11323c88824a6409b7fd4dbfaf11eac61445c99cd4135e861e5e13d61de5bbfe754d804538a1ab5ad5c0b3d0171c","signerAddress":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"}
+            the digest of a message, and of the record signed over it: {"message":"0x3800100eac4415a1965a810f4a4fe40623a27d44f0b6b8f731a9c85de90a6efc","signed":"0x3800100eac4415a1965a810f4a4fe40623a27d44f0b6b8f731a9c85de90a6efc"}
+            a later revision chained to it: {"priorAttestation":"0x3800100eac4415a1965a810f4a4fe40623a27d44f0b6b8f731a9c85de90a6efc","publishedAt":"1778284800n","revision":2,"slug":"hello-world"}
         `);
     });
 });
