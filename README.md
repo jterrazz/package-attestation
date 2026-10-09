@@ -11,6 +11,40 @@ Cryptographic attestation for articles — an EIP-712 signature over the canonic
 | `@jterrazz/attestation/node`      | Node        | OpenTimestamps: `stampDigest`, `upgradeProof`, `verifyOts`; the wallet sign flows              |
 | `npx @jterrazz/attestation` (CLI) | Node        | `sign`, `verify`, `upgrade`; `attestation` once installed — [reference](docs/reference/cli.md) |
 
+## In 30 seconds
+
+```bash
+npm install @jterrazz/attestation viem
+```
+
+```ts
+import { createAttestation, parse, stringify, verifyAttestation } from '@jterrazz/attestation';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+
+const author = privateKeyToAccount(generatePrivateKey());
+const content = '# Hello\n\nWorld.';
+
+const signed = await createAttestation(
+    { content, locale: 'en', publishedAt: new Date(), slug: 'hello', title: 'Hello' },
+    author,
+);
+const json = stringify(signed); // what <article>.attestation.json holds
+
+const verdict = await verifyAttestation({ attestation: parse(json), content });
+console.log(verdict); // { ok: true, signerAddress: '0x…' }
+```
+
+A published article, from any runtime, a browser tab included:
+
+```ts
+import { verifyFromUrl } from '@jterrazz/attestation/browser';
+
+const report = await verifyFromUrl('https://www.jterrazz.com/articles/17-architects-of-inversion');
+console.log(report.authorship.kind, report.date.kind); // verified verified
+```
+
+The same from a terminal, with no install: `npx @jterrazz/attestation verify https://www.jterrazz.com/articles/17-architects-of-inversion`. Signing a file with your own wallet, anchoring it in Bitcoin and verifying it is [the first attestation](docs/start/first-attestation.md), step by step.
+
 ## Flow
 
 1. **Sign** — canonicalize the article body, digest it (SHA-256), build the EIP-712 `AttestationMessage`, sign with the author key → `<article>.attestation.json`.

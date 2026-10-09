@@ -2,6 +2,12 @@
 
 Article attestation: an EIP-712 signature over the canonical bytes of an article, anchored to Bitcoin through OpenTimestamps. What the package is and how a consumer starts using it is the repository's README; this page lists every page of the manual, by what the reader came to do.
 
+## Start
+
+| Page                                                | Answers                                                                          |
+| --------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [The first attestation](start/first-attestation.md) | From an article on disk to a verified signature and a Bitcoin date, with the CLI |
+
 ## Guides
 
 | Page                         | Answers                                                                                                          |
