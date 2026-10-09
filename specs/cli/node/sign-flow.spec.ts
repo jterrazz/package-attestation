@@ -9,6 +9,7 @@ describe('sign-flow', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/consumer/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .exec('sign-flow.mjs');
 
         // Then - each request's answer, the signature the flow resolved with, the page, and the flows that never finish

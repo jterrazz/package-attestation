@@ -9,6 +9,7 @@ describe('message', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/consumer/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .exec('message.mjs');
 
         // Then - every message, and the signature the Hardhat wallet takes over it

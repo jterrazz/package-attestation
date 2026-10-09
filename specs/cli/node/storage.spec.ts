@@ -9,6 +9,7 @@ describe('storage', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/consumer/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .exec('storage.mjs');
 
         // Then - the document, the record both ways, and one refusal per malformed document

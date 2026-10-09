@@ -33,6 +33,7 @@ describe('sign', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/wallet/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .fixture(directory('./__fixtures__/article/'))
             .env(HEADLESS)
             .exec(
@@ -73,6 +74,7 @@ describe('sign', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/wallet/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .fixture(directory('./__fixtures__/article/'))
             .env(HEADLESS)
             .exec(
@@ -106,6 +108,7 @@ describe('sign', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/wallet/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .fixture(directory('./__fixtures__/article/'))
             .env(HEADLESS)
             .exec('node_modules/.bin/attestation sign en.md --title T --slug s --skip-stamp');
@@ -126,6 +129,7 @@ describe('sign', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/wallet/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .fixture(directory('./__fixtures__/article/'))
             .env({ ...HEADLESS, ...NO_CALENDAR })
             .exec(

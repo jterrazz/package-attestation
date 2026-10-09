@@ -9,6 +9,7 @@ describe('ots', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/consumer/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .fixture(directory('../__fixtures__/signews/'))
             .env({
                 HTTPS_PROXY: 'http://127.0.0.1:9',

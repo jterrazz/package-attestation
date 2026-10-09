@@ -9,6 +9,7 @@ describe('verify', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/consumer/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .exec('verify.mjs');
 
         // Then - one verdict per case

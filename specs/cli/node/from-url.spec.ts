@@ -9,6 +9,7 @@ describe('from-url', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/consumer/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .exec('from-url.mjs');
 
         // Then - one report per case, and the URLs each one asked for

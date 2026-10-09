@@ -9,6 +9,7 @@ describe('sign-batch', () => {
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/consumer/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
             .exec('sign-batch.mjs');
 
         // Then - each request's answer, what the flow resolved with, the page, and a flow that never finishes

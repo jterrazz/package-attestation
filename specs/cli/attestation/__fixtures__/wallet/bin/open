@@ -1,17 +1,16 @@
 #!/usr/bin/env node
-// A stand-in for the browser and its wallet: it reads the page the CLI opened, signs the page's typed data with Hardhat's account 0 — the most public key there is — and posts the signature back.
-import { privateKeyToAccount } from 'viem/accounts';
+// outside: stands in for the browser and its wallet on PATH — it reads the typed data the opened page serves, signs it with Hardhat's account, and posts the signature back.
+import { hardhatAccount } from '../hardhat.mjs';
 
 const url = process.argv.at(-1);
 const page = await (await fetch(url)).text();
 const literal = /JSON\.parse\(`([\s\S]*?)`\)/u.exec(page)[1];
 const { domain, message, primaryType, types } = JSON.parse(new Function(`return \`${literal}\`;`)());
 const { EIP712Domain, ...structs } = types;
-const account = privateKeyToAccount('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
-const signature = await account.signTypedData({
+const signature = await hardhatAccount.signTypedData({
     domain,
     message: { ...message, claims: { ...message.claims, publishedAt: BigInt(message.claims.publishedAt) } },
     primaryType,
     types: structs,
 });
-await fetch(new URL('/done', url), { body: JSON.stringify({ signature, signerAddress: account.address }), method: 'POST' });
+await fetch(new URL('/done', url), { body: JSON.stringify({ signature, signerAddress: hardhatAccount.address }), method: 'POST' });

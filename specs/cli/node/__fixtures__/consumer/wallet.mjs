@@ -1,7 +1,4 @@
-import { privateKeyToAccount } from 'viem/accounts';
-
-// Hardhat's default account 0, the most public private key there is: it signs for the specs and holds no value.
-export const wallet = privateKeyToAccount('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
+export { hardhatAccount as wallet } from './hardhat.mjs';
 
 export const article = {
     content: '# Hello\n\nWorld.',
