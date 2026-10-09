@@ -23,6 +23,10 @@ Semver, read from the consumer's side:
 | A removed export or subpath, a renamed CLI flag, a v1 verifier that stops working | major  |
 | A fix that does not change any exported shape                                     | patch  |
 
+While the package is `0.x`, each row moves one place right: a "major" change moves the minor (`0.2.1` → `0.3.0`), anything else the patch. A consumer's `^0.2` already pins the minor, so that is the number that tells it to look before it upgrades; `1.0.0` is a decision of its own, never a side effect of the table.
+
+No CHANGELOG is kept: the GitHub Release notes are the only place a breaking change is carried. A cut that breaks something names it there — the release that removes the `./cli` subpath (it ran the CLI and called `process.exit` on import) says so, and points to `@jterrazz/attestation/node` and the `attestation` binary instead.
+
 The frozen contract in [Signing and anchoring](../concepts/signing-and-anchoring.md) is what makes "a v1 verifier that stops working" a major change rather than a patch: it is a promise to every attestation already published, not only to today's consumers.
 
 ## Related
