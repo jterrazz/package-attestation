@@ -1,0 +1,7 @@
+{
+    "attestation": "en.attestation.json",
+    "content": "en.md",
+    "ots": "en.ots",
+    "schemaVersion": 1,
+    "slug": "13-mapping-the-noise"
+}
