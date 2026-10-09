@@ -1,16 +1,21 @@
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, extname, join } from 'node:path';
+import { hexToBytes } from 'viem';
 
 import { parse } from '../attestation/serialize.js';
 import { verifyAttestation } from '../attestation/verify.js';
+import type { VerifyError } from '../attestation/verify.js';
+import { fetchManifest, fetchOk, manifestUrlOf } from '../browser/proof.js';
 import { verifyOts } from '../ots/verify.js';
 import { checkmark, crossmark, fmt } from './io.js';
 
 export type VerifyArgs = {
-    /** A URL to an article, or a path to a local markdown file. */
+    /** An article's URL, or the path of its markdown file. */
     target: string;
-    /** Skip OTS Bitcoin verification (signature-only). */
+    /** Checks the signature alone. */
     skipOts?: boolean | undefined;
+    /** The Esplora-compatible explorer the Bitcoin block is looked up on. */
+    explorerUrl?: string | undefined;
 };
 
 type Sources = {
@@ -19,20 +24,21 @@ type Sources = {
     otsBytes: null | Uint8Array;
 };
 
+/** Verifies an article's signature, then its Bitcoin date when a proof sits beside it; a proof still pending its block passes. */
 export async function runVerify(args: VerifyArgs): Promise<boolean> {
-    const sources = await loadSources(args);
+    const sources = /^https?:\/\//u.test(args.target)
+        ? await loadFromUrl(args.target)
+        : await loadFromFile(args.target);
 
     const attestation = parse(sources.attestationJson);
-    const sigResult = await verifyAttestation({ attestation, content: sources.content });
-
-    if (!sigResult.ok) {
-        printSignatureFailure(sigResult.error);
+    const signature = await verifyAttestation({ attestation, content: sources.content });
+    if (!signature.ok) {
+        printSignatureFailure(signature.error);
         return false;
     }
-
     process.stdout.write(`${checkmark()} Content digest matches signature\n`);
     process.stdout.write(
-        `${checkmark()} Signature valid — signed by ${fmt.bold(sigResult.signerAddress)}\n`,
+        `${checkmark()} Signature valid — signed by ${fmt.bold(signature.signerAddress)}\n`,
     );
 
     if (args.skipOts === true || sources.otsBytes === null) {
@@ -40,117 +46,57 @@ export async function runVerify(args: VerifyArgs): Promise<boolean> {
         return true;
     }
 
-    const digest = hexToBytes(attestation.subject.contentDigest);
-    const otsResult = await verifyOts(digest, sources.otsBytes);
-
-    if (!otsResult.ok) {
-        process.stdout.write(`${crossmark()} OTS: ${otsResult.reason}`);
-        if (otsResult.details !== undefined && otsResult.details !== '') {
-            process.stdout.write(` — ${otsResult.details}`);
-        }
-        process.stdout.write(`\n`);
-        // Pending is not a hard fail.
-        return otsResult.reason === 'pending-bitcoin';
+    const date = await verifyOts(hexToBytes(attestation.subject.contentDigest), sources.otsBytes, {
+        explorerUrl: args.explorerUrl,
+    });
+    if (date.ok) {
+        process.stdout.write(
+            `${checkmark()} Bitcoin timestamp confirmed at ${date.bitcoinBlockTime.toISOString()}\n`,
+        );
+        return true;
     }
+    const details = date.details === undefined ? '' : ` — ${date.details}`;
+    process.stdout.write(`${crossmark()} OTS: ${date.reason}${details}\n`);
+    return date.reason === 'pending-bitcoin';
+}
 
-    process.stdout.write(
-        `${checkmark()} Bitcoin timestamp confirmed at ${otsResult.bitcoinBlockTime.toISOString()}\n`,
+async function loadFromFile(path: string): Promise<Sources> {
+    const stem = join(dirname(path), basename(path, extname(path)));
+    const [content, attestationJson] = await Promise.all([
+        readFile(path, 'utf8'),
+        // Stryker disable next-line StringLiteral: JSON.parse reads a Buffer as its text, so the encoding is the type's, not the behaviour's
+        readFile(`${stem}.attestation.json`, 'utf8'),
+    ]);
+    const otsBytes = await readFile(`${stem}.ots`).then(
+        (bytes) => new Uint8Array(bytes),
+        () => null,
     );
-    return true;
-}
-
-async function loadSources(args: VerifyArgs): Promise<Sources> {
-    if (/^https?:\/\//u.test(args.target)) {
-        return await loadFromUrl(args.target);
-    }
-    return await loadFromFile(args.target);
-}
-
-async function loadFromFile(filePath: string): Promise<Sources> {
-    const content = await readFile(filePath, 'utf8');
-    const dir = dirname(filePath);
-    const base = basename(filePath, extname(filePath));
-    const attestationJson = await readFile(join(dir, `${base}.attestation.json`), 'utf8');
-    let otsBytes: null | Uint8Array = null;
-    try {
-        const buf = await readFile(join(dir, `${base}.ots`));
-        otsBytes = new Uint8Array(buf);
-    } catch {
-        otsBytes = null;
-    }
     return { attestationJson, content, otsBytes };
 }
 
-async function loadFromUrl(url: string): Promise<Sources> {
-    const proofManifestUrl = resolveManifestUrl(url);
-    const manifest = await fetchJson<ProofManifest>(proofManifestUrl);
-
-    const base = new URL(proofManifestUrl);
-    const [content, attestationJson, otsBuf] = await Promise.all([
-        fetchText(new URL(manifest.content, base).toString()),
-        fetchText(new URL(manifest.attestation, base).toString()),
-        fetchBytes(new URL(manifest.ots, base).toString()).catch(() => null),
+async function loadFromUrl(articleUrl: string): Promise<Sources> {
+    const manifestUrl = manifestUrlOf(articleUrl);
+    const manifest = await fetchManifest(fetch, manifestUrl);
+    const [content, attestationJson, otsBytes] = await Promise.all([
+        fetchOk(fetch, new URL(manifest.content, manifestUrl).toString()).then(
+            async (response) => await response.text(),
+        ),
+        fetchOk(fetch, new URL(manifest.attestation, manifestUrl).toString()).then(
+            async (response) => await response.text(),
+        ),
+        fetchOk(fetch, new URL(manifest.ots, manifestUrl).toString()).then(
+            async (response) => new Uint8Array(await response.arrayBuffer()),
+            () => null,
+        ),
     ]);
-    return { attestationJson, content, otsBytes: otsBuf };
+    return { attestationJson, content, otsBytes };
 }
 
-type ProofManifest = {
-    schemaVersion: number;
-    slug: string;
-    content: string;
-    attestation: string;
-    ots: string;
-};
-
-function resolveManifestUrl(articleUrl: string): string {
-    // Convention: append /proof.json to the article URL (trailing slash tolerated).
-    const url = new URL(articleUrl);
-    if (!url.pathname.endsWith('/')) {
-        url.pathname += '/';
-    }
-    url.pathname += 'proof.json';
-    return url.toString();
-}
-
-async function fetchJson<T>(url: string): Promise<T> {
-    const res = await fetch(url);
-    if (!res.ok) {
-        throw new Error(`Fetch ${url} failed: HTTP ${res.status}`);
-    }
-    return (await res.json()) as T;
-}
-
-async function fetchText(url: string): Promise<string> {
-    const res = await fetch(url);
-    if (!res.ok) {
-        throw new Error(`Fetch ${url} failed: HTTP ${res.status}`);
-    }
-    return await res.text();
-}
-
-async function fetchBytes(url: string): Promise<Uint8Array> {
-    const res = await fetch(url);
-    if (!res.ok) {
-        throw new Error(`Fetch ${url} failed: HTTP ${res.status}`);
-    }
-    return new Uint8Array(await res.arrayBuffer());
-}
-
-function printSignatureFailure(error: Record<string, unknown> & { kind: string }): void {
+function printSignatureFailure(error: VerifyError): void {
     process.stdout.write(`${crossmark()} ${fmt.fail('Verification failed')}: ${error.kind}\n`);
-    for (const [k, v] of Object.entries(error)) {
-        if (k === 'kind') {
-            continue;
+    for (const [key, value] of Object.entries(error)) {
+        if (key !== 'kind') {
+            process.stdout.write(`  ${key}: ${String(value)}\n`);
         }
-        process.stdout.write(`  ${k}: ${String(v)}\n`);
     }
-}
-
-function hexToBytes(hex: `0x${string}`): Uint8Array {
-    const stripped = hex.slice(2);
-    const out = new Uint8Array(stripped.length / 2);
-    for (let i = 0; i < out.length; i += 1) {
-        out[i] = Number.parseInt(stripped.slice(i * 2, i * 2 + 2), 16);
-    }
-    return out;
 }

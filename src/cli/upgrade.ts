@@ -14,11 +14,10 @@ export async function runUpgrade(args: UpgradeArgs): Promise<void> {
 
     for (const path of args.files) {
         process.stdout.write(`${fmt.info('→')} ${path}\n`);
-        const before = await readFile(path);
-        const { bytes, upgraded } = await upgradeProof(new Uint8Array(before));
+        const { bytes, upgraded } = await upgradeProof(new Uint8Array(await readFile(path)));
 
         if (upgraded) {
-            await writeFile(path, Buffer.from(bytes));
+            await writeFile(path, bytes);
             process.stdout.write(
                 `  ${checkmark()} Upgraded to Bitcoin attestation (${bytes.length} bytes)\n`,
             );

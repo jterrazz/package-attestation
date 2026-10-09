@@ -1,12 +1,13 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, join } from 'node:path';
+import { hexToBytes } from 'viem';
 
 import { buildAttestationMessage } from '../attestation/create.js';
 import { stringify } from '../attestation/serialize.js';
-import type { SignedAttestation } from '../attestation/types.js';
 import { signViaBrowser } from '../eth/sign-flow.js';
 import { stampDigest } from '../ots/stamp.js';
 import { audit } from '../primitives/audit.js';
+import type { AuditFinding } from '../primitives/audit.js';
 import { canonicalize } from '../primitives/canonicalize.js';
 import { checkmark, fmt } from './io.js';
 
@@ -22,74 +23,66 @@ export type SignArgs = {
     skipAudit?: boolean | undefined;
 };
 
+/** Signs an article with the browser's wallet: `<name>.attestation.json` beside it, then its calendar-only `<name>.ots`. */
 export async function runSign(args: SignArgs): Promise<void> {
+    const locale = args.locale ?? localeOf(args.file);
     const content = await readFile(args.file, 'utf8');
-    const locale = args.locale ?? deriveLocale(args.file);
-    const publishedAt =
-        args.publishedAt === undefined || args.publishedAt === ''
-            ? new Date()
-            : new Date(args.publishedAt);
-
     const canonical = canonicalize(content);
     process.stdout.write(`${checkmark()} Canonicalized ${canonical.length} bytes (${locale})\n`);
 
     if (args.skipAudit !== true) {
-        const findings = audit(canonical);
-        if (findings.length > 0) {
-            process.stdout.write(`${fmt.warn('!')} ${findings.length} suspicious char(s) found:\n`);
-            for (const f of findings) {
-                process.stdout.write(
-                    `  line ${f.line}, col ${f.column}: U+${f.codepoint
-                        .toString(16)
-                        .toUpperCase()
-                        .padStart(4, '0')} (${f.name})\n`,
-                );
-            }
-            process.stdout.write(`  Pass --skip-audit to sign anyway.\n`);
-            throw new Error('Audit failed: clean up suspicious characters first.');
-        }
+        refuseSuspicious(audit(canonical));
     }
 
     const message = buildAttestationMessage({
         content,
         locale,
         priorAttestation: args.priorAttestation,
-        publishedAt,
+        publishedAt: args.publishedAt === undefined ? new Date() : dateOf(args.publishedAt),
         revision: args.revision,
         slug: args.slug,
         title: args.title,
     });
-
     process.stdout.write(`${fmt.info('→')} Content digest: ${message.subject.contentDigest}\n`);
     process.stdout.write(`${fmt.info('→')} Opening browser to sign with your wallet…\n`);
 
-    const { signature, signerAddress } = await signViaBrowser({ message });
-    const signed: SignedAttestation = { ...message, signature, signerAddress };
+    const signature = await signViaBrowser({ message });
+    process.stdout.write(`${checkmark()} Signed by ${fmt.bold(signature.signerAddress)}\n`);
 
-    process.stdout.write(`${checkmark()} Signed by ${fmt.bold(signerAddress)}\n`);
-
-    const baseName = basename(args.file, extname(args.file));
-    const dir = dirname(args.file);
-    const attestationPath = join(dir, `${baseName}.attestation.json`);
-    await writeFile(attestationPath, stringify(signed), 'utf8');
-    process.stdout.write(`${checkmark()} Wrote ${attestationPath}\n`);
+    const stem = join(dirname(args.file), basename(args.file, extname(args.file)));
+    await writeFile(`${stem}.attestation.json`, stringify({ ...message, ...signature }));
+    process.stdout.write(`${checkmark()} Wrote ${stem}.attestation.json\n`);
 
     if (args.skipStamp !== true) {
         process.stdout.write(`${fmt.info('→')} Submitting to OpenTimestamps calendars…\n`);
-        const digest = hexToBytes(message.subject.contentDigest);
-        const otsBytes = await stampDigest(digest);
-        const otsPath = join(dir, `${baseName}.ots`);
-        await writeFile(otsPath, Buffer.from(otsBytes));
+        const proof = await stampDigest(hexToBytes(message.subject.contentDigest));
+        // Stryker disable StringLiteral: a proof some calendar answered is reached only with the live calendars — make test-network
+        await writeFile(`${stem}.ots`, proof);
         process.stdout.write(
-            `${checkmark()} Wrote ${otsPath} (${otsBytes.length} bytes, calendar-only)\n`,
+            `${checkmark()} Wrote ${stem}.ots (${proof.length} bytes, calendar-only)\n`,
         );
         process.stdout.write(
             `  ${fmt.dim('Run `attestation upgrade` in ~24h to anchor in Bitcoin.')}\n`,
         );
+        // Stryker restore StringLiteral
     }
 }
 
-function deriveLocale(file: string): string {
+function refuseSuspicious(findings: AuditFinding[]): void {
+    if (findings.length === 0) {
+        return;
+    }
+    process.stdout.write(`${fmt.warn('!')} ${findings.length} suspicious char(s) found:\n`);
+    for (const { codepoint, column, line, name } of findings) {
+        process.stdout.write(
+            `  line ${line}, col ${column}: U+${codepoint.toString(16).toUpperCase()} (${name})\n`,
+        );
+    }
+    process.stdout.write('  Pass --skip-audit to sign anyway.\n');
+    throw new Error('Audit failed: clean up suspicious characters first.');
+}
+
+function localeOf(file: string): string {
     const name = basename(file, extname(file));
     if (/^[a-z]{2}$/u.test(name)) {
         return name;
@@ -99,11 +92,10 @@ function deriveLocale(file: string): string {
     );
 }
 
-function hexToBytes(hex: `0x${string}`): Uint8Array {
-    const stripped = hex.slice(2);
-    const out = new Uint8Array(stripped.length / 2);
-    for (let i = 0; i < out.length; i += 1) {
-        out[i] = Number.parseInt(stripped.slice(i * 2, i * 2 + 2), 16);
+function dateOf(iso: string): Date {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) {
+        throw new TypeError(`--published-at must be a date, got ${iso}.`);
     }
-    return out;
+    return date;
 }
