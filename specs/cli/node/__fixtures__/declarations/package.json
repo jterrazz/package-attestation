@@ -1,0 +1,8 @@
+{
+    "name": "declarations",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "@jterrazz/attestation": "*"
+    }
+}
