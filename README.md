@@ -4,12 +4,12 @@ Cryptographic attestation for articles — an EIP-712 signature over the canonic
 
 ## Entries
 
-| Import                          | Runs in     | Carries                                                                           |
-| ------------------------------- | ----------- | --------------------------------------------------------------------------------- |
-| `@jterrazz/attestation`         | Node        | full surface: canonicalize, EIP-712 schema, create/sign/verify, serialize, audit  |
-| `@jterrazz/attestation/browser` | any runtime | verify-only, pure ESM (noble-hashes + viem): `verifyFromUrl`, ENS helpers         |
-| `@jterrazz/attestation/node`    | Node        | OpenTimestamps: `stampDigest`, `upgradeProof`, `verifyOts`; the wallet sign flows |
-| `npx attestation` (CLI)         | Node        | `sign`, `verify`, `upgrade` — [reference](docs/reference/cli.md)                  |
+| Import                            | Runs in     | Carries                                                                                        |
+| --------------------------------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| `@jterrazz/attestation`           | Node        | full surface: canonicalize, EIP-712 schema, create/sign/verify, serialize, audit               |
+| `@jterrazz/attestation/browser`   | any runtime | verify-only, pure ESM (noble-hashes + viem): `verifyFromUrl`, ENS helpers                      |
+| `@jterrazz/attestation/node`      | Node        | OpenTimestamps: `stampDigest`, `upgradeProof`, `verifyOts`; the wallet sign flows              |
+| `npx @jterrazz/attestation` (CLI) | Node        | `sign`, `verify`, `upgrade`; `attestation` once installed — [reference](docs/reference/cli.md) |
 
 ## Flow
 

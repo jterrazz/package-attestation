@@ -1,6 +1,6 @@
 # The CLI
 
-The `attestation` binary, installed with the package (`npx attestation`). It holds no key: `sign` asks the author's browser wallet. Output is coloured on a terminal unless `NO_COLOR` is set.
+The `attestation` binary: `npx @jterrazz/attestation <command>` for one-off use, `attestation <command>` (from `node_modules/.bin`, or `npx attestation` inside the project) once the package is installed. It holds no key: `sign` asks the author's browser wallet. Output is coloured on a terminal unless `NO_COLOR` is set.
 
 | Exit code | Means                                                                                              |
 | --------- | -------------------------------------------------------------------------------------------------- |
