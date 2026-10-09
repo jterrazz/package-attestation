@@ -25,6 +25,8 @@ const BLOCKS: Record<string, { merkle_root: string; timestamp: number }> = {
     },
 };
 
+const READ = 'https://github.com/jterrazz/package-attestation/blob/main/docs/reference/cli.md#';
+
 const SIGNEWS = join(import.meta.dirname, '../__fixtures__/signews');
 
 async function serving(answer: (path: string) => string | Uint8Array | undefined): Promise<Served> {
@@ -264,43 +266,65 @@ describe('verify', () => {
         `);
     });
 
-    test('refuses a call that names no article', async () => {
-        // Given - the binary asked to verify nothing
-        const result = await cli
-            .link('@jterrazz/attestation', packed())
-            .exec('node_modules/.bin/attestation verify');
+    test.each([
+        {
+            argv: ``,
+            label: 'no article',
+            refusal: `found: \`attestation verify\` names no article · why: there is nothing to verify without it · fix: name the article's markdown file or its URL: attestation verify en.md · read: ${READ}verify`,
+        },
+        {
+            argv: `en.md fr.md`,
+            label: 'a second article',
+            refusal: `found: \`attestation verify\` was given fr.md, a second <url|file> · why: the command reads one, and the others would be silently ignored · fix: name one <url|file> per run · read: ${READ}verify`,
+        },
+        {
+            argv: `en.md --explorer a --explorer b`,
+            label: 'an explorer given twice',
+            refusal: `found: --explorer is given more than once · why: the command reads it once, and a second value would silently replace the first · fix: give --explorer once · read: ${READ}verify`,
+        },
+        {
+            argv: `en.md --explorer`,
+            label: 'an explorer flag with no value',
+            refusal: `found: --explorer has no value · why: a flag read without its value would run the command on another value than the one meant · fix: write it --explorer <value>, or --explorer=<value> for a value that starts with -- · read: ${READ}verify`,
+        },
+        {
+            argv: `en.md --skip-ots=no`,
+            label: 'a switch given a value',
+            refusal: `found: --skip-ots takes no value · why: a value the command does not read would be ignored, and the run would not be the one asked for · fix: write it --skip-ots, alone · read: ${READ}verify`,
+        },
+        {
+            argv: `en.md --title T`,
+            label: 'a flag of another command',
+            refusal: `found: \`attestation verify\` has no flag --title · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it — attestation verify <url|file> [--skip-ots] [--explorer <esplora-url>] · read: ${READ}verify`,
+        },
+        {
+            argv: `./https://example.com/en.md`,
+            label: 'a path holding a URL, read as a path',
+            refusal: `found: no file ./https://example.com/en.md · why: the signature is checked against the content of that file · fix: name the article's markdown file, or its URL · read: ${READ}verify`,
+        },
+        {
+            argv: `de.md`,
+            label: 'an article that does not exist',
+            refusal: `found: no file de.md · why: the signature is checked against the content of that file · fix: name the article's markdown file, or its URL · read: ${READ}verify`,
+        },
+        {
+            argv: `en.md`,
+            label: 'an article with no attestation beside it',
+            refusal: `found: no file en.attestation.json · why: the signature is read from the attestation \`sign\` writes beside the article · fix: sign the article first (attestation sign en.md …), or verify its URL · read: ${READ}verify`,
+        },
+    ])(
+        // Given - the binary asked to verify with $label
+        // Then - the refusal in four parts on stderr, and nothing on stdout
+        'refuses $label',
+        async ({ argv, refusal }) => {
+            const result = await cli
+                .link('@jterrazz/attestation', packed())
+                .fixture(directory('./__fixtures__/article/'))
+                .exec(`node_modules/.bin/attestation verify ${argv}`);
 
-        // Then - the refusal on stderr
-        expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
-            Error: Missing required <url|file> argument.
-        `);
-    });
-
-    test('reads a path holding a URL as a path', async () => {
-        // Given - a file path that only contains a URL
-        const result = await cli
-            .link('@jterrazz/attestation', packed())
-            .exec('node_modules/.bin/attestation verify ./https://example.com/en.md');
-
-        // Then - the file it looked for, on stderr
-        expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
-            Error: ENOENT: no such file or directory, open './https://example.com/en.md'
-        `);
-    });
-
-    test('refuses a file whose attestation is missing', async () => {
-        // Given - an article with nothing beside it
-        const result = await cli
-            .link('@jterrazz/attestation', packed())
-            .fixture(directory('./__fixtures__/article/'))
-            .exec('node_modules/.bin/attestation verify en.md');
-
-        // Then - the file it looked for, on stderr
-        expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
-            Error: ENOENT: no such file or directory, open 'en.attestation.json'
-        `);
-    });
+            expect(result.exitCode).toBe(1);
+            expect(result.stderr).toMatch(`${refusal}\n`);
+            expect(result.stdout.text).toBe('');
+        },
+    );
 });

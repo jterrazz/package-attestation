@@ -8,6 +8,7 @@ import type { VerifyError } from '../attestation/verify.js';
 import { fetchManifest, fetchOk, manifestUrlOf } from '../browser/proof.js';
 import { verifyOts } from '../ots/verify.js';
 import { checkmark, crossmark, fmt } from './io.js';
+import { readNamed } from './refusal.js';
 
 export type VerifyArgs = {
     /** An article's URL, or the path of its markdown file. */
@@ -62,16 +63,25 @@ export async function runVerify(args: VerifyArgs): Promise<boolean> {
 
 async function loadFromFile(path: string): Promise<Sources> {
     const stem = join(dirname(path), basename(path, extname(path)));
-    const [content, attestationJson] = await Promise.all([
-        readFile(path, 'utf8'),
-        // Stryker disable next-line StringLiteral: JSON.parse reads a Buffer as its text, so the encoding is the type's, not the behaviour's
-        readFile(`${stem}.attestation.json`, 'utf8'),
-    ]);
+    const content = await readNamed(path, {
+        fix: "name the article's markdown file, or its URL",
+        read: 'verify',
+        why: 'the signature is checked against the content of that file',
+    });
+    const attestationJson = await readNamed(`${stem}.attestation.json`, {
+        fix: `sign the article first (attestation sign ${path} …), or verify its URL`,
+        read: 'verify',
+        why: 'the signature is read from the attestation `sign` writes beside the article',
+    });
     const otsBytes = await readFile(`${stem}.ots`).then(
         (bytes) => new Uint8Array(bytes),
         () => null,
     );
-    return { attestationJson, content, otsBytes };
+    return {
+        attestationJson: attestationJson.toString('utf8'),
+        content: content.toString('utf8'),
+        otsBytes,
+    };
 }
 
 async function loadFromUrl(articleUrl: string): Promise<Sources> {

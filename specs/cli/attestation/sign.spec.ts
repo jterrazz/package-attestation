@@ -17,6 +17,8 @@ const HEADLESS = {
     XDG_CURRENT_DESKTOP: null,
 };
 
+const READ = 'https://github.com/jterrazz/package-attestation/blob/main/docs/reference/cli.md#';
+
 const PRIOR = `0x${'12ab'.repeat(16)}`;
 
 // outside: the OpenTimestamps library's HTTP client honours the proxy variables, so a refusing proxy is every calendar down — nothing leaves the machine.
@@ -112,7 +114,7 @@ describe('sign', () => {
             .fixture(directory('./__fixtures__/article/'))
             .env(HEADLESS)
             .exec(
-                'node_modules/.bin/attestation sign en.md --title \'Cost ${1+1} and ${globalThis.pwned=7}\' --slug s --published-at 2024-05-09T00:00:00Z --skip-stamp',
+                `node_modules/.bin/attestation sign en.md --title 'Cost \${1+1} and \${globalThis.pwned=7}' --slug s --published-at 2024-05-09T00:00:00Z --skip-stamp`,
             );
 
         // Then - the title signed and written is the one given, character for character
@@ -152,7 +154,7 @@ describe('sign', () => {
         // Then - the refusal, and no attestation
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            Error: The wallet's signature does not verify (signer-mismatch): nothing was written.
+            found: the wallet's signature does not verify (signer-mismatch) · why: an attestation that fails verification proves nothing, so none was written · fix: sign again with the account the wallet shows; if it fails again, the wallet signed other data than the page served · read: ${READ}sign
         `);
         expect(result.file('en.attestation.json').exists).toBe(false);
     });
@@ -224,72 +226,127 @@ describe('sign', () => {
             ! 2 suspicious char(s) found:
               line 1, col 11: U+200B (zero-width space)
               line 1, col 44: U+202E (right-to-left override)
-              Pass --skip-audit to sign anyway.
         `);
         expect(result.stderr).toMatch(`
-            Error: Audit failed: clean up suspicious characters first.
+            found: 2 invisible or directional character(s) in en.md, listed above · why: they hide or reorder text, so a reader would not see what is signed · fix: remove them from the article, or pass --skip-audit to sign it as it is · read: ${READ}sign
         `);
+        expect(result.file('en.attestation.json').exists).toBe(false);
     });
 
     test.each([
-        { argv: '', label: 'no file', refusal: 'Error: Missing required <file> argument.' },
-        { argv: 'en.md --slug s', label: 'no title', refusal: 'Error: Missing required --title.' },
-        { argv: 'en.md --title T', label: 'no slug', refusal: 'Error: Missing required --slug.' },
         {
-            argv: 'en.md --title "" --slug s',
+            argv: ``,
+            label: 'no file',
+            refusal: `found: \`attestation sign\` names no article · why: the file, its title and its slug are what is signed · fix: name the markdown file of the article: attestation sign en.md --title <t> --slug <s> · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --slug s`,
+            label: 'no title',
+            refusal: `found: --title is missing or empty · why: the file, its title and its slug are what is signed · fix: give the article's title: --title <t> · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title T`,
+            label: 'no slug',
+            refusal: `found: --slug is missing or empty · why: the file, its title and its slug are what is signed · fix: give the article's slug: --slug <s> · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title "" --slug s`,
             label: 'an empty title',
-            refusal: 'Error: Missing required --title.',
+            refusal: `found: --title is missing or empty · why: the file, its title and its slug are what is signed · fix: give the article's title: --title <t> · read: ${READ}sign`,
         },
         {
-            argv: 'article.md --title T --slug s',
+            argv: `en.md --title --slug s`,
+            label: 'a title flag with no value',
+            refusal: `found: --title has no value · why: a flag read without its value would run the command on another value than the one meant · fix: write it --title <value>, or --title=<value> for a value that starts with -- · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title T --slug`,
+            label: 'a slug flag at the end, with no value',
+            refusal: `found: --slug has no value · why: a flag read without its value would run the command on another value than the one meant · fix: write it --slug <value>, or --slug=<value> for a value that starts with -- · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title a --title b --slug s`,
+            label: 'a title given twice',
+            refusal: `found: --title is given more than once · why: the command reads it once, and a second value would silently replace the first · fix: give --title once · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title T --slug s --skip-stamp --skip-stamp`,
+            label: 'a switch given twice',
+            refusal: `found: --skip-stamp is given more than once · why: the command reads it once, and a second value would silently replace the first · fix: give --skip-stamp once · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title T --slug s --skip-stamp=yes`,
+            label: 'a switch given a value',
+            refusal: `found: --skip-stamp takes no value · why: a value the command does not read would be ignored, and the run would not be the one asked for · fix: write it --skip-stamp, alone · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title T --slug s --explorer x`,
+            label: 'a flag of another command',
+            refusal: `found: \`attestation sign\` has no flag --explorer · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it — attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp] · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title T --slug s -t`,
+            label: 'a short flag it does not have',
+            refusal: `found: \`attestation sign\` has no flag -t · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it — attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp] · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md fr.md --title T --slug s`,
+            label: 'a second file',
+            refusal: `found: \`attestation sign\` was given fr.md, a second <file> · why: the command reads one, and the others would be silently ignored · fix: name one <file> per run · read: ${READ}sign`,
+        },
+        {
+            argv: `article.md --title T --slug s`,
             label: 'a file name that names no locale',
-            refusal:
-                'Error: Cannot derive locale from filename "article.md". Pass --locale explicitly.',
+            refusal: `found: the file name article.md names no locale · why: the locale is signed, and without --locale it is read from a two-letter file name · fix: pass the locale (--locale en), or name the file by it (en.md) · read: ${READ}sign`,
         },
         {
-            argv: 'en.md --title T --slug s --revision 0',
+            argv: `en.md --title T --slug s --revision 0`,
             label: 'a revision of 0',
-            refusal: 'Error: --revision must be a positive integer, got 0.',
+            refusal: `found: --revision 0 is no revision · why: revisions are counted from 1, and signed as a uint16 · fix: give a whole number from 1 to 65535: --revision 2 · read: ${READ}sign`,
         },
         {
-            argv: 'en.md --title T --slug s --revision 2.5',
+            argv: `en.md --title T --slug s --revision 2.5`,
             label: 'a fractional revision',
-            refusal: 'Error: --revision must be a positive integer, got 2.5.',
+            refusal: `found: --revision 2.5 is no revision · why: revisions are counted from 1, and signed as a uint16 · fix: give a whole number from 1 to 65535: --revision 2 · read: ${READ}sign`,
         },
         {
-            argv: 'en.md --title T --slug s --revision 1a',
+            argv: `en.md --title T --slug s --revision 1a`,
             label: 'a revision with a letter',
-            refusal: 'Error: --revision must be a positive integer, got 1a.',
+            refusal: `found: --revision 1a is no revision · why: revisions are counted from 1, and signed as a uint16 · fix: give a whole number from 1 to 65535: --revision 2 · read: ${READ}sign`,
         },
         {
-            argv: 'en.md --title T --slug s --prior-attestation 0x12',
+            argv: `en.md --title T --slug s --revision 65536`,
+            label: 'a revision past a uint16',
+            refusal: `found: --revision 65536 is no revision · why: revisions are counted from 1, and signed as a uint16 · fix: give a whole number from 1 to 65535: --revision 2 · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title T --slug s --prior-attestation 0x12`,
             label: 'a prior attestation that is no digest',
-            refusal:
-                'Error: --prior-attestation must be a 32-byte hex digest (0x + 64 hex), got 0x12.',
+            refusal: `found: --prior-attestation 0x12 is no 32-byte digest · why: the prior attestation is signed as a bytes32 · fix: give 0x and 64 hex digits, the digest of the attestation this revision follows · read: ${READ}sign`,
         },
         {
             argv: `en.md --title T --slug s --prior-attestation x${PRIOR}`,
             label: 'a prior attestation behind a prefix',
-            refusal: `Error: --prior-attestation must be a 32-byte hex digest (0x + 64 hex), got x${PRIOR}.`,
+            refusal: `found: --prior-attestation x${PRIOR} is no 32-byte digest · why: the prior attestation is signed as a bytes32 · fix: give 0x and 64 hex digits, the digest of the attestation this revision follows · read: ${READ}sign`,
         },
         {
             argv: `en.md --title T --slug s --prior-attestation ${PRIOR}ff`,
             label: 'a prior attestation one byte too long',
-            refusal: `Error: --prior-attestation must be a 32-byte hex digest (0x + 64 hex), got ${PRIOR}ff.`,
+            refusal: `found: --prior-attestation ${PRIOR}ff is no 32-byte digest · why: the prior attestation is signed as a bytes32 · fix: give 0x and 64 hex digits, the digest of the attestation this revision follows · read: ${READ}sign`,
         },
         {
-            argv: 'en.md --title T --slug s --published-at yesterday',
+            argv: `en.md --title T --slug s --published-at yesterday`,
             label: 'a date that is none',
-            refusal: 'Error: --published-at must be a date, got yesterday.',
+            refusal: `found: --published-at yesterday is no date · why: the publication date is signed, in unix seconds · fix: give an ISO 8601 date: --published-at 2024-05-09T00:00:00Z · read: ${READ}sign`,
         },
         {
-            argv: 'de.md --title T --slug s',
+            argv: `de.md --title T --slug s`,
             label: 'a file that does not exist',
-            refusal: "Error: ENOENT: no such file or directory, open 'de.md'",
+            refusal: `found: no file de.md · why: the signature is over the content of that file · fix: name the markdown file of the article, from the directory you run in · read: ${READ}sign`,
         },
     ])(
         // Given - the binary asked to sign with $label
-        // Then - the refusal on stderr, and nothing on stdout
+        // Then - the refusal in four parts on stderr, and nothing written
         'refuses $label',
         async ({ argv, refusal }) => {
             const result = await cli
@@ -299,6 +356,7 @@ describe('sign', () => {
 
             expect(result.exitCode).toBe(1);
             expect(result.stderr).toMatch(`${refusal}\n`);
+            expect(result.file('en.attestation.json').exists).toBe(false);
         },
     );
 });

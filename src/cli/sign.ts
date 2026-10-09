@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, join } from 'node:path';
 import { hexToBytes } from 'viem';
 
@@ -11,6 +11,7 @@ import { audit } from '../primitives/audit.js';
 import type { AuditFinding } from '../primitives/audit.js';
 import { canonicalize } from '../primitives/canonicalize.js';
 import { checkmark, fmt } from './io.js';
+import { readNamed, RefusalError } from './refusal.js';
 
 export type SignArgs = {
     file: string;
@@ -27,12 +28,17 @@ export type SignArgs = {
 /** Signs an article with the browser's wallet: `<name>.attestation.json` beside it, then its calendar-only `<name>.ots`. */
 export async function runSign(args: SignArgs): Promise<void> {
     const locale = args.locale ?? localeOf(args.file);
-    const content = await readFile(args.file, 'utf8');
+    const bytes = await readNamed(args.file, {
+        fix: 'name the markdown file of the article, from the directory you run in',
+        read: 'sign',
+        why: 'the signature is over the content of that file',
+    });
+    const content = bytes.toString('utf8');
     const canonical = canonicalize(content);
     process.stdout.write(`${checkmark()} Canonicalized ${canonical.length} bytes (${locale})\n`);
 
     if (args.skipAudit !== true) {
-        refuseSuspicious(audit(canonical));
+        refuseSuspicious(args.file, audit(canonical));
     }
 
     const message = buildAttestationMessage({
@@ -50,9 +56,12 @@ export async function runSign(args: SignArgs): Promise<void> {
     const signed = { ...message, ...(await signViaBrowser({ message })) };
     const verdict = await verifyAttestation({ attestation: signed, content });
     if (!verdict.ok) {
-        throw new Error(
-            `The wallet's signature does not verify (${verdict.error.kind}): nothing was written.`,
-        );
+        throw new RefusalError({
+            fix: 'sign again with the account the wallet shows; if it fails again, the wallet signed other data than the page served',
+            found: `the wallet's signature does not verify (${verdict.error.kind})`,
+            read: 'sign',
+            why: 'an attestation that fails verification proves nothing, so none was written',
+        });
     }
     process.stdout.write(`${checkmark()} Signed by ${fmt.bold(signed.signerAddress)}\n`);
 
@@ -75,7 +84,7 @@ export async function runSign(args: SignArgs): Promise<void> {
     }
 }
 
-function refuseSuspicious(findings: AuditFinding[]): void {
+function refuseSuspicious(file: string, findings: AuditFinding[]): void {
     if (findings.length === 0) {
         return;
     }
@@ -85,8 +94,12 @@ function refuseSuspicious(findings: AuditFinding[]): void {
             `  line ${line}, col ${column}: U+${codepoint.toString(16).toUpperCase()} (${name})\n`,
         );
     }
-    process.stdout.write('  Pass --skip-audit to sign anyway.\n');
-    throw new Error('Audit failed: clean up suspicious characters first.');
+    throw new RefusalError({
+        fix: 'remove them from the article, or pass --skip-audit to sign it as it is',
+        found: `${findings.length} invisible or directional character(s) in ${file}, listed above`,
+        read: 'sign',
+        why: 'they hide or reorder text, so a reader would not see what is signed',
+    });
 }
 
 function localeOf(file: string): string {
@@ -94,15 +107,23 @@ function localeOf(file: string): string {
     if (/^[a-z]{2}$/u.test(name)) {
         return name;
     }
-    throw new Error(
-        `Cannot derive locale from filename "${basename(file)}". Pass --locale explicitly.`,
-    );
+    throw new RefusalError({
+        fix: 'pass the locale (--locale en), or name the file by it (en.md)',
+        found: `the file name ${basename(file)} names no locale`,
+        read: 'sign',
+        why: 'the locale is signed, and without --locale it is read from a two-letter file name',
+    });
 }
 
 function dateOf(iso: string): Date {
     const date = new Date(iso);
     if (Number.isNaN(date.getTime())) {
-        throw new TypeError(`--published-at must be a date, got ${iso}.`);
+        throw new RefusalError({
+            fix: 'give an ISO 8601 date: --published-at 2024-05-09T00:00:00Z',
+            found: `--published-at ${iso} is no date`,
+            read: 'sign',
+            why: 'the publication date is signed, in unix seconds',
+        });
     }
     return date;
 }
