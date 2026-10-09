@@ -1,57 +1,28 @@
-/**
- * Canonicalize an article body for attestation v1.
- *
- * FROZEN CONTRACT — v1 rules below must NEVER change. Any modification requires
- * publishing a v2 alongside (and v1 verifiers stay alive forever).
- *
- * Rules applied in order:
- *  1. Reject unpaired UTF-16 surrogates (corrupt input).
- *  2. Strip a leading BOM (U+FEFF) if present.
- *  3. Apply Unicode NFC normalization.
- *  4. Convert CRLF and stray CR to LF.
- *  5. Trim trailing whitespace and append exactly one LF.
- *  6. Encode as UTF-8 bytes.
- *
- * No markdown parsing. No per-line whitespace trim (would break "  \n" soft breaks).
- * No tab → space substitution (would break code blocks).
- * No interior whitespace collapsing.
- */
+// invariant: the v1 rules are frozen — every published attestation was signed over the bytes they produce; a change ships as CANONICAL_VERSION 2 beside v1, whose verifier stays.
+/** Canonicalizes an article body into the bytes an attestation v1 signs: well-formed UTF-16, no leading BOM, NFC, LF line endings, no trailing whitespace but one LF, UTF-8. */
 export function canonicalize(input: string): Uint8Array {
-    assertValidUtf16(input);
+    assertWellFormed(input);
 
-    let s = input;
-    if (s.charCodeAt(0) === 0xfe_ff) {
-        s = s.slice(1);
-    }
-    s = s.normalize('NFC');
-    s = s.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
-    // \s with /u flag covers all ECMAScript whitespace, including U+00A0 and U+FEFF.
-    s = `${s.replace(/\s+$/u, '')}\n`;
+    const normalized = input.replace(/^﻿/u, '').normalize('NFC').replaceAll(/\r\n?/gu, '\n');
 
-    return new TextEncoder().encode(s);
+    // hazard: only the end is trimmed — a per-line trim would erase a markdown soft break, a tab substitution a code block, and so the meaning of a published article.
+    return new TextEncoder().encode(`${normalized.replace(/\s+$/u, '')}\n`);
 }
-
-/**
- * Version of the canonicalization algorithm that produced bytes.
- * Embedded into every attestation so future verifiers can dispatch correctly.
- */
-export { CANONICAL_VERSION as canonicalVersion } from '../version.js';
 
 export class InvalidContentError extends Error {
     override name = 'InvalidContentError';
 }
 
-function assertValidUtf16(s: string): void {
-    for (let i = 0; i < s.length; i += 1) {
-        const code = s.charCodeAt(i);
-        if (code >= 0xd8_00 && code <= 0xdb_ff) {
-            const next = s.charCodeAt(i + 1);
-            if (!(next >= 0xdc_00 && next <= 0xdf_ff)) {
-                throw new InvalidContentError(`Unpaired high surrogate at index ${i}`);
-            }
-            i += 1;
-        } else if (code >= 0xdc_00 && code <= 0xdf_ff) {
-            throw new InvalidContentError(`Unpaired low surrogate at index ${i}`);
+function assertWellFormed(input: string): void {
+    let index = 0;
+    for (const character of input) {
+        const codePoint = character.codePointAt(0) ?? 0;
+        if (codePoint >= 0xd8_00 && codePoint <= 0xdb_ff) {
+            throw new InvalidContentError(`Unpaired high surrogate at index ${index}`);
         }
+        if (codePoint >= 0xdc_00 && codePoint <= 0xdf_ff) {
+            throw new InvalidContentError(`Unpaired low surrogate at index ${index}`);
+        }
+        index += character.length;
     }
 }

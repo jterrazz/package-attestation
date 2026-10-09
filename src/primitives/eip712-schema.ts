@@ -1,13 +1,4 @@
-/**
- * EIP-712 typed-data schema for attestation v1 — FROZEN.
- *
- * Once a single attestation is published, every byte of this file is part of an
- * immutable contract. Modifying any value below changes the typed-data digest
- * and invalidates every previously signed attestation.
- *
- * To evolve: introduce v2 alongside (`eip712-schema-v2.ts`), bump SCHEMA_VERSION,
- * keep v1 verifier alive forever, dispatch by attestation.schemaVersion.
- */
+// invariant: frozen — every byte of the domain and the types is part of the digest each v1 signature was taken over; a v2 is added beside with a new SCHEMA_VERSION, verified by dispatching on schemaVersion, and v1's verifier stays.
 
 export const ATTESTATION_DOMAIN_V1 = {
     chainId: 1,
@@ -36,9 +27,7 @@ export const ATTESTATION_TYPES_V1 = {
 
 export const ATTESTATION_PRIMARY_TYPE = 'Attestation' as const;
 
-/**
- * Sentinel value for `priorAttestation` when this is the first revision.
- */
+/** The `priorAttestation` of a first revision: 32 zero bytes. */
 export const NO_PRIOR_ATTESTATION =
     '0x0000000000000000000000000000000000000000000000000000000000000000' as const;
 
@@ -60,5 +49,3 @@ export type AttestationMessage = {
     subject: ArticleSubject;
     claims: ArticleClaims;
 };
-
-export { SCHEMA_VERSION as currentSchemaVersion } from '../version.js';

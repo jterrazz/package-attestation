@@ -1,17 +1,7 @@
 import { sha256 } from '@noble/hashes/sha2.js';
+import { bytesToHex } from '@noble/hashes/utils.js';
 
-/**
- * SHA-256 of bytes, returned as bare hex (no 0x prefix).
- *
- * Uses @noble/hashes — pure JS, sync, audited, runs identically in Node, Bun,
- * Deno, and every modern browser. This is the only hash primitive used by the
- * package, so swapping the implementation here is the single point of change.
- */
+/** The SHA-256 of the bytes, as bare lowercase hex — the same in every runtime the browser entry reaches. */
 export function sha256Hex(bytes: Uint8Array): string {
-    const out = sha256(bytes);
-    let hex = '';
-    for (const byte of out) {
-        hex += byte.toString(16).padStart(2, '0');
-    }
-    return hex;
+    return bytesToHex(sha256(bytes));
 }
