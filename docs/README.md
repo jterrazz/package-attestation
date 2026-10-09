@@ -1,13 +1,28 @@
-# @jterrazz/attestation — the corpus
+# @jterrazz/attestation — the manual
 
-The manual of this repository: what it signs, how it is changed, and what proves it works. The vitrine is the root `README.md`.
+Article attestation: an EIP-712 signature over the canonical bytes of an article, anchored to Bitcoin through OpenTimestamps. What the package is and how a consumer starts using it is the repository's README; this page lists every page of the manual, by what the reader came to do.
 
-| Chapter                                                    | Holds                                                                                                               |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| [01-architecture.md](01-architecture.md)                   | The four entries, the layers behind them, and the boundary that keeps the browser one runtime-agnostic              |
-| [02-developing.md](02-developing.md)                       | The toolchain, where a new file goes, and the conventions a change must keep                                        |
-| [03-testing.md](03-testing.md)                             | The two test projects, the spec tree, what a golden pins, and how the network folder opts in                        |
-| [04-operating.md](04-operating.md)                         | What publishes this package, what a merge to `main` does NOT do, and who cuts a release                             |
-| [05-signing-and-anchoring.md](05-signing-and-anchoring.md) | The domain itself: canonicalization, the EIP-712 schema, the digest chain, and Bitcoin anchoring via OpenTimestamps |
+## Guides
 
-No decision recorded here spans only this repository yet — a repository-local `docs/decisions/` opens the day one does.
+| Page                         | Answers                                                                                                          |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| [Develop](guides/develop.md) | Changing the package: the declaration, the gestures, where a new file goes, the conventions a change keeps       |
+| [Test](guides/test.md)       | Proving a change: the frozen goldens, the specs that install the tarball, the doubles they stand on, the mutants |
+| [Release](guides/release.md) | How the package is published, who cuts a release, and which number moves                                         |
+
+## Concepts
+
+| Page                                                       | Answers                                                                                      |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [Architecture](concepts/architecture.md)                   | The three entries and the bin, the folders behind them, the boundary the browser entry keeps |
+| [Signing and anchoring](concepts/signing-and-anchoring.md) | What an attestation proves: canonicalization, the EIP-712 schema, the digest chain, Bitcoin  |
+
+## Reference
+
+| Page                        | Answers                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| [The CLI](reference/cli.md) | Every command of the `attestation` binary, its flags, its output and exit codes |
+
+## Decisions
+
+No decision recorded here spans only this repository yet; a `decisions/` folder opens the day one does. A decision spanning several repositories is recorded by the corpus that spans them.

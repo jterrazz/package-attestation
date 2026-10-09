@@ -13,7 +13,7 @@ What an attestation actually proves, in order: the content is exactly what was c
 5. Trim trailing whitespace and append exactly one LF.
 6. Encode as UTF-8 bytes.
 
-No markdown parsing, no per-line trim, no tab-to-space substitution, no interior whitespace collapsing — each would silently change a published article's meaning. `CANONICAL_VERSION` (`src/version.ts`) is embedded in every attestation so a future verifier can dispatch on it; changing a rule above means shipping v1 alongside a new v2, never editing v1 in place. The exact bytes each rule produces for a fixed set of inputs are pinned by the goldens in [03-testing.md](03-testing.md).
+No markdown parsing, no per-line trim, no tab-to-space substitution, no interior whitespace collapsing — each would silently change a published article's meaning. `CANONICAL_VERSION` (`src/version.ts`) is published beside `SCHEMA_VERSION` but not written into an attestation: a v1 record's `schemaVersion: 1` is what names canonicalization v1, so a future verifier dispatches on it. Changing a rule above means shipping v1 alongside a new v2, never editing v1 in place. The exact bytes each rule produces for a fixed set of inputs are pinned by the frozen goldens of [Test](../guides/test.md).
 
 `audit()` (`src/primitives/audit.ts`) runs only at sign time, over the canonical bytes, and flags invisible/directional Unicode characters (zero-width space, RTL overrides, and the like) that an author probably did not mean to publish. It is advice, not a rule a verifier applies — `verifyAttestation` never sees it.
 
@@ -34,7 +34,7 @@ No markdown parsing, no per-line trim, no tab-to-space substitution, no interior
 
 The domain (`ATTESTATION_DOMAIN_V1`) pins `chainId: 1`, so a signature is scoped to this scheme and cannot be replayed as a signature over an unrelated EIP-712 message on the same chain. `signAttestation()` calls a viem `LocalAccount`'s `signTypedData`; the CLI never holds a private key itself — see § Two ways to sign below.
 
-`toStored`/`fromStored`/`stringify`/`parse` (`src/attestation/serialize.ts`) are the only conversion between the in-memory `SignedAttestation` (a `bigint` `publishedAt`) and the on-disk `StoredAttestation` JSON (`publishedAt` as a string, since JSON has no bigint) — the `<article>.attestation.json` file.
+`toStored`/`fromStored`/`stringify`/`parse` (`src/attestation/serialize.ts`) are the only conversion between the in-memory `SignedAttestation` (a `bigint` `publishedAt`) and the on-disk `StoredAttestation` JSON (`publishedAt` as a string, since JSON has no bigint) — the `<article>.attestation.json` file. `parse` refuses a document missing a member or holding one of the wrong type with a `TypeError`, and leaves out any member the record does not have; whether the document is authentic is `verifyAttestation`'s to say.
 
 ## 3. Verify
 
@@ -44,20 +44,20 @@ The domain (`ATTESTATION_DOMAIN_V1`) pins `chainId: 1`, so a signature is scoped
 
 `stampDigest()` (`src/ots/stamp.ts`) submits the 32-byte content digest to OpenTimestamps calendar servers and returns proof bytes — the `<article>.ots` file — that start calendar-only. `upgradeProof()` re-submits those bytes later (the project's own guidance: after roughly 24h) and returns whether a Bitcoin attestation actually attached this time; the CLI's `attestation upgrade` calls it directly on one or more `.ots` files.
 
-`verifyOts()` (`src/ots/verify.ts`) checks that a proof attests the given digest and, if a Bitcoin attestation is present, returns the block time. It accepts an `explorerUrl` override to point the Merkle-path lookup at a self-hosted or stubbed Esplora-compatible endpoint instead of the library's public default — both spellings of the underlying flag (`ignore_bitcoin_node` and `ignoreBitcoinNode`) are passed together because the library's own documentation and code disagree on the name (`src/ots/verify.ts:78`).
+`verifyOts()` (`src/ots/verify.ts`) checks that a proof attests the given digest and, if a Bitcoin attestation is present, returns the block time. It accepts an `explorerUrl` to look the blocks up on an Esplora-compatible explorer of your own (or a double) instead of the library's public default; the CLI passes it as `--explorer`. Both spellings of the library's flag (`ignore_bitcoin_node` and `ignoreBitcoinNode`) are passed together, because its documentation and its code disagree on the name. A proof the library cannot read is refused as `invalid-proof`, "Not an OpenTimestamps proof"; a proof whose blocks disagree with it, or an explorer that cannot be reached, is `invalid-proof` with the library's reason; a proof with no Bitcoin attestation yet is `pending-bitcoin`. The library logs each block it trusts (`Lite-client verification, assuming block … is valid`) on stdout, which the CLI's output therefore carries.
 
 ## Two ways to sign
 
 - **The CLI** (`attestation sign <file> --title <t> --slug <s>`, `src/cli/sign.ts`) canonicalizes, audits, builds the message, then calls `signViaBrowser()` — it never holds a private key.
-- **`signViaBrowser()`** (`src/eth/sign-flow.ts`) starts a one-shot HTTP server bound to `127.0.0.1` only, opens a browser tab (or calls `onUrlReady`, for tests) serving a page that asks a wallet extension to sign the EIP-712 message, and resolves once that page POSTs the signature back to `/done`. `signBatchViaBrowser()` (`src/eth/sign-batch-flow.ts`) is the same flow for several messages signed in one wallet session.
+- **`signViaBrowser()`** (`src/eth/sign-flow.ts`) starts a one-shot HTTP server bound to `127.0.0.1` only (`src/eth/loopback.ts`), opens the default browser on it (or hands the URL to `onUrlReady`) serving a page that asks the wallet (`window.ethereum`) for an EIP-712 v4 signature, and resolves once that page posts a 65-byte signature and a 20-byte address to `/done`; anything else is answered 400 and the page may retry. `signBatchViaBrowser()` (`src/eth/sign-batch-flow.ts`) is the same flow for several messages in one wallet session: each signature is posted to `/sig` under its entry's id, each refusal to `/skip`, and `/done` resolves with both maps.
 
 ## The two verify surfaces
 
-- **`verifyAttestation` + `verifyOts`**, composed by the CLI's `attestation verify <url|file>` (`src/cli/verify.ts`) and by `verifyFromUrl()` (`src/browser/verify-from-url.ts`) for a published article: fetch `{articleUrl}/proof.json`, then the content, the `.attestation.json` and (unless `skipOts`) an `otsVerifier` endpoint the manifest may point at — OpenTimestamps needs Node's `fs`/`crypto`, so a browser calling `verifyFromUrl` delegates that one leg to a server-side endpoint and reports `skipped` when the manifest names none.
+- **`verifyAttestation` + `verifyOts`**, composed by the CLI's `attestation verify <url|file>` (`src/cli/verify.ts`) and by `verifyFromUrl()` (`src/browser/verify-from-url.ts`) for a published article: fetch `{articleUrl}/proof.json` (`src/browser/proof.ts`), then the content, the `.attestation.json` and (unless `skipOts`) an `otsVerifier` endpoint the manifest may point at — OpenTimestamps needs Node's `fs`/`crypto`, so a browser calling `verifyFromUrl` delegates that one leg to a server-side endpoint and reports `skipped` when the manifest names none. A manifest that is no manifest, a page that does not answer 2xx, and an attestation that is none are reported as a `fetch` failure with their reason; a verifier answering something that is no verdict fails the date leg the same way.
 - **ENS is decoration only.** `resolveEnsName()` (`src/browser/ens.ts`) reverse-resolves a signer address to a friendlier label for display; it is never persisted in the attestation and never affects whether a signature verifies.
 
 ## Related
 
-- [Architecture](01-architecture.md) — which layer each piece above lives in, and the browser/Node boundary.
-- [Testing](03-testing.md) — the goldens that pin the frozen bytes, and the network suite that proves the OpenTimestamps calls for real.
-- [Operating](04-operating.md) — why a break to this contract is a major version, not a patch.
+- [Architecture](architecture.md) — which folder each piece above lives in, and the browser/Node boundary.
+- [Test](../guides/test.md) — the goldens that pin the frozen bytes, and the specs that prove each leg from the tarball.
+- [Release](../guides/release.md) — why a break to this contract is a major version, not a patch.
