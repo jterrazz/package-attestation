@@ -14,12 +14,14 @@ async function ask(url, path, init) {
 }
 const post = (body) => ({ body, method: 'POST' });
 
+let walking;
 const lines = [];
 let page = '';
 let served = '';
 const result = await signViaBrowser({
     message,
-    onUrlReady: async (url) => {
+    onUrlReady: (url) => {
+        walking = (async () => {
         served = url;
         lines.push(`served on ${url.replace(/\d+\/$/u, 'PORT/')}`);
         page = await (await fetch(url)).text();
@@ -39,9 +41,13 @@ const result = await signViaBrowser({
         lines.push(await ask(url, '/done', post(JSON.stringify({ signature: [signature], signerAddress }))));
         lines.push(await ask(url, '/done', post(JSON.stringify({ signature, signerAddress: [signerAddress] }))));
         lines.push(await ask(url, '/done', post(JSON.stringify({ signature, signerAddress, extra: true }))));
+        })();
+        return walking;
     },
     timeoutMs: 5000,
 });
+// The last answer the page reads may arrive after the flow settles: the walk is awaited before anything is printed.
+await walking;
 process.stdout.write(`${lines.join('\n')}\nresolved: ${JSON.stringify(result)}\n`);
 await fetch(served).then(
     (response) => process.stdout.write(`after the flow: still answering ${response.status}\n`),

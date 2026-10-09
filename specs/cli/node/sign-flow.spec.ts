@@ -30,6 +30,7 @@ describe('sign-flow', () => {
             POST /done → 400 text/plain "Invalid payload"
             POST /done → 400 text/plain "Invalid payload"
             POST /done → 400 text/plain "Invalid payload"
+            POST /done → 200 text/plain "OK"
             resolved: {"signature":"0xababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab","signerAddress":"0xCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCd"}
             after the flow: the server is closed
             <!doctype html>

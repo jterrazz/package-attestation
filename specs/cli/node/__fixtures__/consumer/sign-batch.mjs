@@ -17,11 +17,13 @@ async function ask(url, path, init) {
 }
 const post = (body) => ({ body, method: 'POST' });
 
+let walking;
 const lines = [];
 let page = '';
 const result = await signBatchViaBrowser({
     entries,
-    onUrlReady: async (url) => {
+    onUrlReady: (url) => {
+        walking = (async () => {
         page = await (await fetch(url)).text();
         lines.push(await ask(url, '/'));
         lines.push(await ask(url, '/index.html'));
@@ -40,9 +42,13 @@ const result = await signBatchViaBrowser({
         lines.push(await ask(url, '/skip', post(JSON.stringify({ id: 'third' }))));
         lines.push(await ask(url, '/skip', post(JSON.stringify({ id: 'fourth', reason: 4 }))));
         lines.push(await ask(url, '/done', post('')));
+        })();
+        return walking;
     },
     timeoutMs: 5000,
 });
+// The last answer the page reads may arrive after the flow settles: the walk is awaited before anything is printed.
+await walking;
 process.stdout.write(`${lines.join('\n')}\n`);
 process.stdout.write(`signatures: ${JSON.stringify([...result.signatures])}\nskipped: ${JSON.stringify([...result.skipped])}\n`);
 process.stdout.write(`${page}\n`);
