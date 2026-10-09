@@ -53,6 +53,21 @@ describe('upgrade', () => {
         },
     );
 
+    test('reads every proof before it rewrites any', async () => {
+        // Given - an anchored proof, then a proof that is not there
+        const result = await cli
+            .link('@jterrazz/attestation', packed())
+            .fixture(directory('../__fixtures__/signews/'))
+            .exec('node_modules/.bin/attestation upgrade en.ots gone.ots');
+
+        // Then - the missing one refused before the first is asked about
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(`
+            found: no file gone.ots · why: only an existing proof can be upgraded · fix: name the .ots file \`sign\` wrote beside the article · read: ${READ}upgrade
+        `);
+        expect(result.stdout.text).toBe('');
+    });
+
     test('refuses bytes that are no proof', async () => {
         // Given - four bytes where a proof should be
         const result = await cli

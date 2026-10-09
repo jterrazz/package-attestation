@@ -10,29 +10,25 @@ import { runVerify } from './verify.js';
 const SURFACES: Readonly<Record<CommandName, Surface>> = {
     sign: {
         flags: {
-            locale: 'value',
-            'prior-attestation': 'value',
-            'published-at': 'value',
-            revision: 'value',
-            'skip-audit': 'switch',
-            'skip-stamp': 'switch',
-            slug: 'value',
-            title: 'value',
+            locale: true,
+            'prior-attestation': true,
+            'published-at': true,
+            revision: true,
+            'skip-audit': false,
+            'skip-stamp': false,
+            slug: true,
+            title: true,
         },
         operand: '<file>',
-        operands: 1,
         usage: 'attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp]',
     },
     upgrade: {
         flags: {},
-        operand: '<ots-file>',
-        operands: Number.POSITIVE_INFINITY,
         usage: 'attestation upgrade <ots-file> [<ots-file> …]',
     },
     verify: {
-        flags: { explorer: 'value', 'skip-ots': 'switch' },
+        flags: { explorer: true, 'skip-ots': false },
         operand: '<url|file>',
-        operands: 1,
         usage: 'attestation verify <url|file> [--skip-ots] [--explorer <esplora-url>]',
     },
 };

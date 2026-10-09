@@ -4,10 +4,10 @@ export type CommandName = 'sign' | 'upgrade' | 'verify';
 
 export type Surface = {
     usage: string;
-    flags: Readonly<Record<string, 'switch' | 'value'>>;
-    operand: string;
-    /** How many operands it reads at most. */
-    operands: number;
+    /** Each flag it has, true when the flag takes a value. */
+    flags: Readonly<Record<string, boolean>>;
+    /** The one operand it reads; a command without one reads a list. */
+    operand?: string;
 };
 
 export type Line = {
@@ -52,8 +52,8 @@ function readOne(reading: Reading, argument: string, next: string | undefined): 
     const spelled = equals === -1 ? argument : argument.slice(0, equals);
     const inline = equals === -1 ? undefined : argument.slice(equals + 1);
     const flag = spelled.slice(2);
-    const kind = spelled.startsWith('--') ? reading.surface.flags[flag] : undefined;
-    if (kind === undefined) {
+    const takesValue = spelled.startsWith('--') ? reading.surface.flags[flag] : undefined;
+    if (takesValue === undefined) {
         throw refusal(reading, {
             fix: `drop it — ${reading.surface.usage}`,
             found: `\`attestation ${reading.name}\` has no flag ${spelled}`,
@@ -67,9 +67,9 @@ function readOne(reading: Reading, argument: string, next: string | undefined): 
             why: 'the command reads it once, and a second value would silently replace the first',
         });
     }
-    return kind === 'switch'
-        ? readSwitch(reading, spelled, inline)
-        : readValue(reading, spelled, inline ?? next, inline === undefined ? 2 : 1);
+    return takesValue
+        ? readValue(reading, spelled, inline ?? next, inline === undefined ? 2 : 1)
+        : readSwitch(reading, spelled, inline);
 }
 
 function readSwitch(reading: Reading, spelled: string, inline: string | undefined): number {
@@ -102,11 +102,12 @@ function readValue(
 }
 
 function refuseExcess(reading: Reading): void {
-    const excess = reading.operands[reading.surface.operands];
-    if (excess !== undefined) {
+    const { operand } = reading.surface;
+    const excess = reading.operands[1];
+    if (operand !== undefined && excess !== undefined) {
         throw refusal(reading, {
-            fix: `name one ${reading.surface.operand} per run`,
-            found: `\`attestation ${reading.name}\` was given ${excess}, a second ${reading.surface.operand}`,
+            fix: `name one ${operand} per run`,
+            found: `\`attestation ${reading.name}\` was given ${excess}, a second ${operand}`,
             why: 'the command reads one, and the others would be silently ignored',
         });
     }

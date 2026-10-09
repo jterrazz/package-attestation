@@ -266,6 +266,20 @@ describe('verify', () => {
         `);
     });
 
+    test('fails a path it cannot read as a file, as a failure rather than a refusal', async () => {
+        // Given - the binary asked to verify a directory
+        const result = await cli
+            .link('@jterrazz/attestation', packed())
+            .fixture(directory('./__fixtures__/article/'))
+            .exec('node_modules/.bin/attestation verify .');
+
+        // Then - the system's error, on stderr
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(`
+            Error: EISDIR: illegal operation on a directory, read
+        `);
+    });
+
     test.each([
         {
             argv: ``,
@@ -311,6 +325,16 @@ describe('verify', () => {
             argv: `en.md`,
             label: 'an article with no attestation beside it',
             refusal: `found: no file en.attestation.json · why: the signature is read from the attestation \`sign\` writes beside the article · fix: sign the article first (attestation sign en.md …), or verify its URL · read: ${READ}verify`,
+        },
+        {
+            argv: `-`,
+            label: 'a lone dash, read as a file',
+            refusal: `found: no file - · why: the signature is checked against the content of that file · fix: name the article's markdown file, or its URL · read: ${READ}verify`,
+        },
+        {
+            argv: `--skip-ots -- -h`,
+            label: 'an operand after --, read as a file and not a flag',
+            refusal: `found: no file -h · why: the signature is checked against the content of that file · fix: name the article's markdown file, or its URL · read: ${READ}verify`,
         },
     ])(
         // Given - the binary asked to verify with $label

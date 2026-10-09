@@ -13,6 +13,7 @@ export type Lesson = {
 export class RefusalError extends Error {
     constructor({ found, why, fix, read }: Lesson) {
         super(`found: ${found} · why: ${why} · fix: ${fix} · read: ${REFERENCE}#${read}`);
+        // Stryker disable next-line StringLiteral: the binary prints the message alone, so the name is the class's, never read
         this.name = 'RefusalError';
     }
 }
@@ -22,6 +23,7 @@ export async function readNamed(path: string, lesson: Omit<Lesson, 'found'>): Pr
     try {
         return await readFile(path);
     } catch (error) {
+        // Stryker disable next-line ConditionalExpression,LogicalOperator: readFile rejects only with an Error carrying a code, so the first two tests only narrow its type
         if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
             throw new RefusalError({ ...lesson, found: `no file ${path}` });
         }

@@ -36,11 +36,13 @@ export async function runUpgrade(args: UpgradeArgs): Promise<void> {
         process.stdout.write(`${fmt.info('→')} ${proof.path}\n`);
         const { bytes, upgraded } = await upgradeProof(proof.bytes);
 
+        // Stryker disable ConditionalExpression,BlockStatement,StringLiteral: a proof the calendars upgrade is reached only with the live calendars — make test-network
         if (upgraded) {
             await writeFile(proof.path, bytes);
             process.stdout.write(
                 `  ${checkmark()} Upgraded to Bitcoin attestation (${bytes.length} bytes)\n`,
             );
+            // Stryker restore all
         } else {
             process.stdout.write(
                 `  ${fmt.dim('· No new attestation available yet, leaving file untouched.')}\n`,

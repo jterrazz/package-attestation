@@ -73,7 +73,7 @@ describe('sign', () => {
     });
 
     test('signs a later revision under the locale and the prior attestation it is given', async () => {
-        // Given - the same article signed as revision 2 of an earlier attestation, under a file name that names no locale
+        // Given - the same article signed as the last revision a uint16 holds, after an earlier attestation, its title and locale given inline
         const result = await cli
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/wallet/'))
@@ -81,7 +81,7 @@ describe('sign', () => {
             .fixture(directory('./__fixtures__/article/'))
             .env(HEADLESS)
             .exec(
-                `node_modules/.bin/attestation sign en.md --title T --slug s --locale fr --revision 123 --prior-attestation ${PRIOR} --published-at 2024-05-09T00:00:00Z --skip-stamp`,
+                `node_modules/.bin/attestation sign en.md --title=T --slug s --locale=fr --revision 65535 --prior-attestation ${PRIOR} --published-at 2024-05-09T00:00:00Z --skip-stamp`,
             );
 
         // Then - the claims carry the revision chain and the locale
@@ -91,11 +91,11 @@ describe('sign', () => {
               "claims": {
                 "priorAttestation": "0x12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab12ab",
                 "publishedAt": "1715212800",
-                "revision": 123,
+                "revision": 65535,
                 "slug": "s"
               },
               "schemaVersion": 1,
-              "signature": "0x6b63fd69660a024befc714b6095c55b57579c5666aec329d5a9a4a433afc7f885e70762f6cf791c86b0a38c48363bbc016cc49e039663cb7057f96ac929fc4711c",
+              "signature": "0x23a8a4ebc0195a5d930e28ce1fc33a09b9b66cd14303fcda207d469d3c9d7c0d720d91bb5bc703afbe3b459afdef2ba1253874576eb6baa685538cd89f927b291b",
               "signerAddress": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
               "subject": {
                 "contentDigest": "0x0c756fb254e676df5d0c429a6d7120a86ab9dfff689c6ad913fd53811b9dd1fe",
@@ -213,6 +213,23 @@ describe('sign', () => {
             Error: No OpenTimestamps calendar answered: the proof would attest nothing.
         `);
         expect(result.file('en.ots').exists).toBe(false);
+    });
+
+    test('signs an article holding invisible characters when the audit is skipped', async () => {
+        // Given - the article with a zero-width space and a right-to-left override, signed with --skip-audit
+        const result = await cli
+            .link('@jterrazz/attestation', packed())
+            .fixture(directory('./__fixtures__/wallet/'))
+            .fixture(directory('../__fixtures__/hardhat/'))
+            .fixture(directory('./__fixtures__/suspicious/'))
+            .env(HEADLESS)
+            .exec(
+                'node_modules/.bin/attestation sign en.md --title T --slug s --published-at 2024-05-09T00:00:00Z --skip-audit --skip-stamp',
+            );
+
+        // Then - no audit, and the attestation written
+        expect(result.exitCode).toBe(0);
+        expect(result.file('en.attestation.json').exists).toBe(true);
     });
 
     test('refuses an article holding invisible characters before anything is signed', async () => {
@@ -346,6 +363,16 @@ describe('sign', () => {
             argv: `de.md --title T --slug s`,
             label: 'a file that does not exist',
             refusal: `found: no file de.md · why: the signature is over the content of that file · fix: name the markdown file of the article, from the directory you run in · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title T --slug s --revision=0`,
+            label: 'a revision given inline that is none',
+            refusal: `found: --revision 0 is no revision · why: revisions are counted from 1, and signed as a uint16 · fix: give a whole number from 1 to 65535: --revision 2 · read: ${READ}sign`,
+        },
+        {
+            argv: `en.md --title T -Xskip-stamp --slug s`,
+            label: 'a flag behind one dash',
+            refusal: `found: \`attestation sign\` has no flag -Xskip-stamp · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it — attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp] · read: ${READ}sign`,
         },
     ])(
         // Given - the binary asked to sign with $label
