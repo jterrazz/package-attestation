@@ -6,26 +6,45 @@ import {
     ATTESTATION_PRIMARY_TYPE,
     ATTESTATION_TYPES_V1,
 } from '../primitives/eip712-schema.js';
+import { messageOf } from '../primitives/error-message.js';
 import { sha256Hex } from '../primitives/sha256.js';
 import { SCHEMA_VERSION } from '../version.js';
-import type { SignedAttestation, VerifyResult } from './types.js';
+import type { SignedAttestation } from './record.js';
 
 export type VerifyInput = {
     content: string;
     attestation: SignedAttestation;
 };
 
-export async function verifyAttestation(input: VerifyInput): Promise<VerifyResult> {
-    const att = input.attestation;
+export type VerifyOk = {
+    ok: true;
+    signerAddress: `0x${string}`;
+};
 
-    if (att.schemaVersion !== SCHEMA_VERSION) {
+export type VerifyError =
+    | { kind: 'content-mismatch'; expectedDigest: `0x${string}`; actualDigest: `0x${string}` }
+    | { kind: 'invalid-signature'; reason: string }
+    | { kind: 'schema-version-unsupported'; version: number }
+    | { kind: 'signer-mismatch'; recovered: `0x${string}`; declared: `0x${string}` };
+
+export type VerifyFail = {
+    ok: false;
+    error: VerifyError;
+};
+
+export type VerifyResult = VerifyFail | VerifyOk;
+
+export async function verifyAttestation(input: VerifyInput): Promise<VerifyResult> {
+    const { attestation } = input;
+
+    if (attestation.schemaVersion !== SCHEMA_VERSION) {
         return {
-            error: { kind: 'schema-version-unsupported', version: att.schemaVersion },
+            error: { kind: 'schema-version-unsupported', version: attestation.schemaVersion },
             ok: false,
         };
     }
 
-    const expected = att.subject.contentDigest;
+    const expected = attestation.subject.contentDigest;
     const actual = `0x${sha256Hex(canonicalize(input.content))}` as const;
     if (actual !== expected) {
         return {
@@ -38,21 +57,25 @@ export async function verifyAttestation(input: VerifyInput): Promise<VerifyResul
     try {
         recovered = await recoverTypedDataAddress({
             domain: ATTESTATION_DOMAIN_V1,
-            message: { claims: att.claims, schemaVersion: att.schemaVersion, subject: att.subject },
+            message: {
+                claims: attestation.claims,
+                schemaVersion: attestation.schemaVersion,
+                subject: attestation.subject,
+            },
             primaryType: ATTESTATION_PRIMARY_TYPE,
-            signature: att.signature,
+            signature: attestation.signature,
             types: ATTESTATION_TYPES_V1,
         });
     } catch (error) {
         return {
-            error: { kind: 'invalid-signature', reason: (error as Error).message },
+            error: { kind: 'invalid-signature', reason: messageOf(error) },
             ok: false,
         };
     }
 
-    if (recovered.toLowerCase() !== att.signerAddress.toLowerCase()) {
+    if (recovered.toLowerCase() !== attestation.signerAddress.toLowerCase()) {
         return {
-            error: { declared: att.signerAddress, kind: 'signer-mismatch', recovered },
+            error: { declared: attestation.signerAddress, kind: 'signer-mismatch', recovered },
             ok: false,
         };
     }

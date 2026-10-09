@@ -10,7 +10,7 @@ import {
 import type { AttestationMessage } from '../primitives/eip712-schema.js';
 import { sha256Hex } from '../primitives/sha256.js';
 import { SCHEMA_VERSION } from '../version.js';
-import type { SignedAttestation } from './types.js';
+import type { SignedAttestation } from './record.js';
 
 export type CreateAttestationInput = {
     content: string;
