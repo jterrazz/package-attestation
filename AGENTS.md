@@ -1,25 +1,26 @@
 # Agent brief — `@jterrazz/attestation`
 
-EIP-712 article attestation anchored to Bitcoin via OpenTimestamps: sign once, verify anywhere. This file **routes**; it does not restate what the corpus already says.
+EIP-712 article attestation anchored to Bitcoin via OpenTimestamps: sign once, verify anywhere. This file **routes**; it does not restate what the manual says.
 
-## Where knowledge lives (route here first)
+## Where knowledge lives
 
-The corpus is `docs/` + `README.md`, mapped by [docs/README.md](docs/README.md). Do not duplicate it — link to it.
+The manual is `docs/`, mapped by [docs/README.md](docs/README.md). Read the page before the change; link to it, never copy it.
 
-| Working on…                                           | Read                               |
-| ----------------------------------------------------- | ---------------------------------- |
-| The four entries, the layers, the browser boundary    | `docs/01-architecture.md`          |
-| The toolchain, where a new file goes, the conventions | `docs/02-developing.md`            |
-| The two test projects, what a golden pins             | `docs/03-testing.md`               |
-| The release, and which number moves                   | `docs/04-operating.md`             |
-| Canonicalization, EIP-712, signing, OTS anchoring     | `docs/05-signing-and-anchoring.md` |
+| Working on…                                             | Read                                     |
+| ------------------------------------------------------- | ---------------------------------------- |
+| The entries, the folders, the browser boundary          | `docs/concepts/architecture.md`          |
+| Canonicalization, EIP-712, signing, OTS anchoring       | `docs/concepts/signing-and-anchoring.md` |
+| The declaration, the gestures, where a new file goes    | `docs/guides/develop.md`                 |
+| The frozen goldens, the specs from the tarball, doubles | `docs/guides/test.md`                    |
+| The release, and which number moves                     | `docs/guides/release.md`                 |
+| The `attestation` binary's commands and flags           | `docs/reference/cli.md`                  |
 
-`skills/jterrazz-attestation/` routes agents into this corpus for the domain itself (the two artifacts, which entry to pick, the invariants) — it does not restate it either.
+`skills/jterrazz-attestation/` routes agents into this manual for the domain itself — it does not restate it either.
 
 ## Setup
 
 ```bash
-npm ci
+make install
 ```
 
 ## Commands
@@ -27,9 +28,13 @@ npm ci
 | Task                                     | Command             |
 | ---------------------------------------- | ------------------- |
 | Build                                    | `make build`        |
-| Every quality gate (lint, format, types) | `make lint`         |
-| Auto-fix lint issues                     | `make lint-fix`     |
+| Every quality gate                       | `make lint`         |
+| Apply the fixers                         | `make fix`          |
 | Run all tests (offline)                  | `make test`         |
 | Run the OpenTimestamps network suite too | `make test-network` |
+| Mutation over the change                 | `make mutation`     |
+| What CI runs                             | `make check`        |
+
+No test may open a window: the browser the `sign` command opens is a stand-in on `PATH` in the specs ([Test](docs/guides/test.md)).
 
 `CLAUDE.md` at the root is a symlink to this file: one brief, two names, no second copy.

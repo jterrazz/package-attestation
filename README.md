@@ -4,12 +4,12 @@ Cryptographic attestation for articles — an EIP-712 signature over the canonic
 
 ## Entries
 
-| Import                          | Runs in     | Carries                                                                          |
-| ------------------------------- | ----------- | -------------------------------------------------------------------------------- |
-| `@jterrazz/attestation`         | Node        | full surface: canonicalize, EIP-712 schema, create/sign/verify, serialize, audit |
-| `@jterrazz/attestation/browser` | any runtime | verify-only, pure ESM (noble-hashes + viem): `verifyFromUrl`, ENS helpers        |
-| `@jterrazz/attestation/node`    | Node        | OpenTimestamps: `stampDigest`, `upgradeProof`, `verifyOts`                       |
-| `npx attestation` (CLI)         | Node        | `sign`, `verify`, `upgrade`                                                      |
+| Import                          | Runs in     | Carries                                                                           |
+| ------------------------------- | ----------- | --------------------------------------------------------------------------------- |
+| `@jterrazz/attestation`         | Node        | full surface: canonicalize, EIP-712 schema, create/sign/verify, serialize, audit  |
+| `@jterrazz/attestation/browser` | any runtime | verify-only, pure ESM (noble-hashes + viem): `verifyFromUrl`, ENS helpers         |
+| `@jterrazz/attestation/node`    | Node        | OpenTimestamps: `stampDigest`, `upgradeProof`, `verifyOts`; the wallet sign flows |
+| `npx attestation` (CLI)         | Node        | `sign`, `verify`, `upgrade` — [reference](docs/reference/cli.md)                  |
 
 ## Flow
 
@@ -20,20 +20,12 @@ Cryptographic attestation for articles — an EIP-712 signature over the canonic
 
 ## Tests
 
-`npm test` (offline, deterministic). `npm run test:network` opts into the OpenTimestamps-calendar e2e suite.
+`make test` (offline, deterministic: the package is specified from its tarball). `make test-network` opts into the live OpenTimestamps calendars.
 
 Reference consumer: [`jterrazz-web`](https://github.com/jterrazz/jterrazz-web) (verify page, proof card, signing scripts).
 
 ## Documentation
 
-The full corpus lives in [`docs/`](docs/):
-
-- [Architecture](docs/01-architecture.md) — the four entries, the layers, the browser boundary.
-- [Developing](docs/02-developing.md) — the toolchain and where a new file goes.
-- [Testing](docs/03-testing.md) — the two test projects and what a golden pins.
-- [Operating](docs/04-operating.md) — what publishes it, and which number moves.
-- [Signing and anchoring](docs/05-signing-and-anchoring.md) — canonicalization, EIP-712, the digest chain, Bitcoin anchoring.
-
-For agents: read the chapters straight from the repo, plus the [`skills/jterrazz-attestation`](skills/jterrazz-attestation/SKILL.md) Claude Code skill.
+The manual is [`docs/`](docs/README.md): the architecture and what an attestation proves, how the package is developed, tested and released, and the CLI's reference. For agents: the [`skills/jterrazz-attestation`](skills/jterrazz-attestation/SKILL.md) skill.
 
 MIT © [Jean-Baptiste Terrazzoni](https://github.com/jterrazz)

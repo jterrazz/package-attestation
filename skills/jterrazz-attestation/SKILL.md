@@ -9,7 +9,7 @@ An attestation proves an article existed, unmodified, at a point in time, signed
 
 ## The two artifacts
 
-- `<article>.attestation.json` — the signed EIP-712 claims (`StoredAttestation`): subject (slug, digest, canonical version), claims (publishedAt, prior digest), signature.
+- `<article>.attestation.json` — the signed EIP-712 record (`StoredAttestation`): `subject` (title, content digest, locale), `claims` (slug, publishedAt, revision, priorAttestation), `schemaVersion`, the signature and its signer.
 - `<article>.ots` — the OpenTimestamps proof of the digest; starts pending, becomes Bitcoin-anchored after `upgrade`.
 
 ## Pick the right entry
@@ -18,15 +18,15 @@ An attestation proves an article existed, unmodified, at a point in time, signed
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Sign, serialize, audit, full verify    | `@jterrazz/attestation` (Node)                                                                                     |
 | Verify in a page/component             | `@jterrazz/attestation/browser` — pure ESM, no Node imports; `verifyFromUrl` does the whole dance from public URLs |
-| Stamp/upgrade/verify the Bitcoin proof | `@jterrazz/attestation/node` (`stampDigest`, `upgradeProof`, `verifyOts`)                                          |
-| One-off operations                     | `npx attestation` (`sign`, `verify`, `upgrade`)                                                                    |
+| Stamp/upgrade/verify the Bitcoin proof | `@jterrazz/attestation/node` (`stampDigest`, `upgradeProof`, `verifyOts` with an optional `explorerUrl`)           |
+| One-off operations                     | `npx attestation` (`sign`, `verify [--explorer]`, `upgrade`) — `docs/reference/cli.md`                             |
 
 ## Invariants (do not fight them)
 
 - **Canonicalize before digesting** — the signature covers the canonical form, not the raw file. `CANONICAL_VERSION`/`SCHEMA_VERSION` are versioned: changing either means a new version that still verifies the old ones.
 - **The browser entry stays runtime-agnostic** — never add a Node-only import there; the export map is the boundary.
-- **The digest chain** — `claims.prior` links attestations (`NO_PRIOR_ATTESTATION` for the first); a retitle/edit re-signs with the previous digest as prior.
-- Verification is offline; only stamping/upgrading talks to OpenTimestamps calendars (opt-in tests: `npm run test:network`).
+- **The digest chain** — `claims.priorAttestation` links revisions (`NO_PRIOR_ATTESTATION` for the first, `claims.revision` counting from 1); a retitle or an edit re-signs with the previous attestation as prior (`--revision`, `--prior-attestation`).
+- Signature verification is offline; stamping and upgrading talk to the OpenTimestamps calendars, and the Bitcoin date to a block explorer (`explorerUrl` / `--explorer` names your own). `parse` refuses a document that is no stored attestation.
 
 ## Reference consumer
 
