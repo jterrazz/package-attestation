@@ -1,46 +1,30 @@
 import OpenTimestamps from 'javascript-opentimestamps';
 
+import { proofFileOf } from './proof-file.js';
+
 const { DetachedTimestampFile, Ops } = OpenTimestamps;
 
-/**
- * Submit a SHA-256 digest to OpenTimestamps calendars and return the proof bytes.
- *
- * The returned proof initially contains only calendar attestations. Run upgrade()
- * after ~24h to anchor it in a Bitcoin block.
- */
+/** Submits a SHA-256 digest to the OpenTimestamps calendars and returns its proof, calendar-only until `upgradeProof` anchors it in a Bitcoin block, about a day later. */
 export async function stampDigest(digest: Uint8Array): Promise<Uint8Array> {
     if (digest.length !== 32) {
         throw new Error(`Expected 32-byte SHA-256 digest, got ${digest.length} bytes`);
     }
 
-    const detached = DetachedTimestampFile.fromHash(
-        new (Ops.OpSHA256 as new () => unknown)(),
-        Buffer.from(digest),
-    );
-    await (OpenTimestamps as unknown as { stamp: (d: unknown) => Promise<void> }).stamp(detached);
-
-    const serialize = (detached as { serializeToBytes: () => Buffer | Uint8Array })
-        .serializeToBytes;
-    const bytes = serialize.call(detached);
-    return new Uint8Array(bytes as Buffer);
+    const detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), digest);
+    await OpenTimestamps.stamp(detached);
+    // outside: the library resolves even when every calendar failed, with a proof that attests nothing.
+    // Stryker disable next-line ConditionalExpression: a stamp some calendar answered is reached only with the live calendars — make test-network
+    if (detached.timestamp.getAttestations().size === 0) {
+        throw new Error('No OpenTimestamps calendar answered: the proof would attest nothing.');
+    }
+    return new Uint8Array(detached.serializeToBytes());
 }
 
-/**
- * Try to upgrade a calendar-only proof to a Bitcoin-anchored proof.
- *
- * Returns the (possibly upgraded) proof bytes plus a flag indicating whether
- * the upgrade actually attached a Bitcoin attestation this time.
- */
+/** Asks the calendars for the Bitcoin attestation of a calendar-only proof: the proof, and whether one was attached this time. */
 export async function upgradeProof(
     otsBytes: Uint8Array,
 ): Promise<{ bytes: Uint8Array; upgraded: boolean }> {
-    const detached = DetachedTimestampFile.deserialize(Buffer.from(otsBytes));
-    const upgraded = await (
-        OpenTimestamps as unknown as { upgrade: (d: unknown) => Promise<boolean> }
-    ).upgrade(detached);
-
-    const serialize = (detached as { serializeToBytes: () => Buffer | Uint8Array })
-        .serializeToBytes;
-    const bytes = serialize.call(detached);
-    return { bytes: new Uint8Array(bytes as Buffer), upgraded };
+    const detached = proofFileOf(otsBytes);
+    const upgraded = await OpenTimestamps.upgrade(detached);
+    return { bytes: new Uint8Array(detached.serializeToBytes()), upgraded };
 }

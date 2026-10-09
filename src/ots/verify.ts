@@ -1,27 +1,13 @@
 import OpenTimestamps from 'javascript-opentimestamps';
 
-const { DetachedTimestampFile, Ops } = OpenTimestamps as {
-    DetachedTimestampFile: {
-        deserialize: (bytes: Buffer | Uint8Array) => unknown;
-        fromHash: (op: unknown, hash: Buffer) => unknown;
-    };
-    Ops: { OpSHA256: unknown };
-    verify: (
-        detached: unknown,
-        original: unknown,
-        options?: unknown,
-    ) => Promise<Record<string, { timestamp: number }>>;
-};
+import { messageOf } from '../primitives/error-message.js';
+import { proofFileOf } from './proof-file.js';
 
-/**
- * Options for {@link verifyOts}.
- *
- * `explorerUrl` points the Bitcoin block lookup at an alternative Esplora-
- * compatible endpoint (e.g. a self-hosted explorer, or a test stub). When
- * absent the library's default public source is used.
- */
+const { DetachedTimestampFile, Ops } = OpenTimestamps;
+
 export type OtsVerifyOptions = {
-    explorerUrl?: string;
+    /** An Esplora-compatible explorer the Bitcoin block lookup asks instead of the library's public default — a node of your own, or a double. */
+    explorerUrl?: string | undefined;
 };
 
 export type OtsVerifyOk = {
@@ -37,20 +23,11 @@ export type OtsVerifyFail = {
 
 export type OtsVerifyResult = OtsVerifyFail | OtsVerifyOk;
 
-/**
- * Verify an OTS proof attests the given digest, and return the Bitcoin block
- * attestation time if present.
- *
- * Network: this calls a Bitcoin block-info source via the OTS library to
- * validate the Merkle path — the library's default public source, or the
- * Esplora-compatible endpoint given in `options.explorerUrl`. In
- * production-paranoid mode you should run your own Bitcoin node and point
- * the explorer option at it.
- */
+/** Verifies that a proof attests the digest, and returns the time of the earliest Bitcoin block that anchors it; the block is looked up on the network. */
 export async function verifyOts(
     digest: Uint8Array,
     otsBytes: Uint8Array,
-    options?: OtsVerifyOptions,
+    options: OtsVerifyOptions = {},
 ): Promise<OtsVerifyResult> {
     if (digest.length !== 32) {
         return {
@@ -60,57 +37,30 @@ export async function verifyOts(
         };
     }
 
-    let detached: unknown;
-    let original: unknown;
     try {
-        detached = DetachedTimestampFile.deserialize(Buffer.from(otsBytes));
-        original = DetachedTimestampFile.fromHash(
-            new (Ops.OpSHA256 as new () => unknown)(),
-            Buffer.from(digest),
+        const stamped = proofFileOf(otsBytes);
+        const original = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), digest);
+        const { bitcoin } = await OpenTimestamps.verify(
+            stamped,
+            original,
+            explorerOptions(options),
         );
+        if (bitcoin === undefined) {
+            return { ok: false, reason: 'pending-bitcoin' };
+        }
+        return { bitcoinBlockTime: new Date(bitcoin.timestamp * 1000), ok: true };
     } catch (error) {
-        return { details: (error as Error).message, ok: false, reason: 'invalid-proof' };
+        return { details: messageOf(error), ok: false, reason: 'invalid-proof' };
     }
+}
 
-    // An explicit explorer forces the Esplora path — no local Bitcoin node
-    // Probing — so the lookup goes exactly where the caller pointed it.
-    // The lib's docs name the flag `ignore_bitcoin_node` but the code checks
-    // `ignoreBitcoinNode` — pass both so either side of that drift works.
-    // The esplora timeout is documented as seconds but flows straight into
-    // Request-promise, which reads milliseconds — so this is 10s, not 10000s.
-    const explorerUrl = options?.explorerUrl ?? '';
-    const verifyOptions =
-        explorerUrl === ''
-            ? undefined
-            : {
-                  esplora: { timeout: 10_000, url: explorerUrl },
-                  ignore_bitcoin_node: true,
-                  ignoreBitcoinNode: true,
-              };
-
-    let attestations: Record<string, { timestamp: number }>;
-    try {
-        const ots = OpenTimestamps as unknown as {
-            verify: (
-                detached: unknown,
-                original: unknown,
-                options?: unknown,
-            ) => Promise<Record<string, { timestamp: number }>>;
-        };
-        attestations = verifyOptions
-            ? await ots.verify(detached, original, verifyOptions)
-            : await ots.verify(detached, original);
-    } catch (error) {
-        return { details: (error as Error).message, ok: false, reason: 'invalid-proof' };
+// Stryker disable StringLiteral,ConditionalExpression,BlockStatement: without an explorer the library asks a local Bitcoin node, then the public explorer — the network, which no offline spec reaches; the two paths differ only there
+function explorerOptions({ explorerUrl = '' }: OtsVerifyOptions): object {
+    if (explorerUrl === '') {
+        return {};
     }
-
-    const { bitcoin } = attestations;
-    if (bitcoin === undefined) {
-        return { ok: false, reason: 'pending-bitcoin' };
-    }
-
-    return {
-        bitcoinBlockTime: new Date(bitcoin.timestamp * 1000),
-        ok: true,
-    };
+    // Stryker restore all
+    // outside: the library reads `ignoreBitcoinNode` (its docs say `ignore_bitcoin_node`), and its explorer timeout, documented in seconds, reaches its HTTP client as milliseconds — 10 s.
+    // Stryker disable next-line BooleanLiteral: the library's local-node lookup is dead today (its readBitcoinConf reads array indices, never a file), so the flag changes nothing yet; it keeps a fixed library from asking a local node before the explorer named
+    return { esplora: { timeout: 10_000, url: explorerUrl }, ignoreBitcoinNode: true };
 }
