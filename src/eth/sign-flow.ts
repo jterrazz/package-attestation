@@ -1,147 +1,54 @@
-import { createServer as createHttpServer } from 'node:http';
-import { createServer } from 'node:net';
-import type { AddressInfo } from 'node:net';
-
-import {
-    ATTESTATION_DOMAIN_V1,
-    ATTESTATION_PRIMARY_TYPE,
-    ATTESTATION_TYPES_V1,
-} from '../primitives/eip712-schema.js';
 import type { AttestationMessage } from '../primitives/eip712-schema.js';
+import { openInBrowser } from './browser.js';
+import { NOT_FOUND, serveOnLoopback } from './loopback.js';
+import type { Answer } from './loopback.js';
 import { buildSignPageHtml } from './sign-page-html.js';
+import { typedDataOf, walletSignatureOf } from './typed-data.js';
+import type { WalletSignature } from './typed-data.js';
 
 export type SignFlowOptions = {
     message: AttestationMessage;
+    /** Receives the page's URL; opens it in the default browser by default. */
     onUrlReady?: (url: string) => Promise<void> | void;
+    /** Default 5 minutes. */
     timeoutMs?: number;
 };
 
-export type SignFlowResult = {
-    signature: `0x${string}`;
-    signerAddress: `0x${string}`;
-};
+export type SignFlowResult = WalletSignature;
 
 const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
 
-/**
- * Spin up a one-shot localhost HTTP server, open the browser, wait for the user
- * to sign with their wallet, return the signature.
- *
- * The local server only accepts loopback requests (127.0.0.1).
- */
+/** Serves a page on 127.0.0.1 that asks the browser's wallet to sign the message, and resolves with the signature it posts back to `/done`; a malformed post is answered 400 and the page may retry. */
 export async function signViaBrowser(opts: SignFlowOptions): Promise<SignFlowResult> {
-    const { message } = opts;
+    const html = buildSignPageHtml(JSON.stringify(typedDataOf(opts.message)));
     const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-    const typedData = {
-        domain: ATTESTATION_DOMAIN_V1,
-        message: serializeMessageForBrowser(message),
-        primaryType: ATTESTATION_PRIMARY_TYPE,
-        types: { EIP712Domain: domainTypes(), ...ATTESTATION_TYPES_V1 },
-    };
-    const html = buildSignPageHtml(JSON.stringify(typedData));
-
-    return await new Promise<SignFlowResult>((resolve, reject) => {
-        const server = createHttpServer((req, res) => {
-            if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
-                res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-                res.end(html);
-                return;
+    return await serveOnLoopback<SignFlowResult>({
+        answer: (method, path, body): Answer<SignFlowResult> => {
+            if (method === 'GET' && (path === '/' || path === '/index.html')) {
+                return { body: html, contentType: 'text/html; charset=utf-8', status: 200 };
             }
-
-            if (req.method === 'POST' && req.url === '/done') {
-                let body = '';
-                req.on('data', (chunk: Buffer) => {
-                    body += chunk.toString('utf8');
-                });
-                req.on('end', () => {
-                    let parsed: { signature: `0x${string}`; signerAddress: `0x${string}` };
-                    try {
-                        parsed = JSON.parse(body) as typeof parsed;
-                    } catch {
-                        res.writeHead(400);
-                        res.end('Parse error');
-                        // Keep the server running so the user can retry.
-                        return;
-                    }
-                    if (
-                        typeof parsed.signature !== 'string' ||
-                        !/^0x[0-9a-fA-F]{130}$/u.test(parsed.signature) ||
-                        typeof parsed.signerAddress !== 'string' ||
-                        !/^0x[0-9a-fA-F]{40}$/u.test(parsed.signerAddress)
-                    ) {
-                        res.writeHead(400);
-                        res.end('Invalid payload');
-                        // Keep the server running so the user can retry.
-                        return;
-                    }
-                    res.writeHead(200, { 'content-type': 'text/plain' });
-                    res.end('OK');
-                    res.on('finish', () => {
-                        clearTimeout(timer);
-                        server.close();
-                        resolve(parsed);
-                    });
-                });
-                return;
+            if (method === 'POST' && path === '/done') {
+                return answerSignature(body);
             }
-
-            res.writeHead(404);
-            res.end('Not found');
-        });
-
-        const timer = setTimeout(() => {
-            server.close();
-            reject(new Error(`Sign flow timed out after ${timeoutMs}ms`));
-        }, timeoutMs);
-
-        server.on('error', (err) => {
-            clearTimeout(timer);
-            reject(err);
-        });
-
-        server.listen(0, '127.0.0.1', () => {
-            const addr = server.address() as AddressInfo;
-            const url = `http://127.0.0.1:${addr.port}/`;
-            const ready = opts.onUrlReady ?? defaultOpenInBrowser;
-            void Promise.resolve(ready(url)).catch((error: unknown) => {
-                clearTimeout(timer);
-                server.close();
-                reject(error instanceof Error ? error : new Error(String(error)));
-            });
-        });
+            return NOT_FOUND;
+        },
+        onUrlReady: opts.onUrlReady ?? openInBrowser,
+        timeoutMessage: `Sign flow timed out after ${timeoutMs}ms`,
+        timeoutMs,
     });
 }
 
-async function defaultOpenInBrowser(url: string): Promise<void> {
-    const { default: open } = await import('open');
-    await open(url);
+function answerSignature(body: string): Answer<SignFlowResult> {
+    let posted: unknown;
+    try {
+        posted = JSON.parse(body);
+    } catch {
+        return { body: 'Parse error', status: 400 };
+    }
+    const signature = walletSignatureOf(posted);
+    if (signature === null) {
+        return { body: 'Invalid payload', status: 400 };
+    }
+    return { body: 'OK', settled: { value: signature }, status: 200 };
 }
-
-/**
- * Convert AttestationMessage (with bigint publishedAt) to a JSON-serializable
- * form for the browser. EIP-712 v4 expects numeric strings for uint64.
- */
-function serializeMessageForBrowser(message: AttestationMessage): Record<string, unknown> {
-    return {
-        claims: {
-            priorAttestation: message.claims.priorAttestation,
-            publishedAt: message.claims.publishedAt.toString(),
-            revision: message.claims.revision,
-            slug: message.claims.slug,
-        },
-        schemaVersion: message.schemaVersion,
-        subject: message.subject,
-    };
-}
-
-function domainTypes(): { name: string; type: string }[] {
-    return [
-        { name: 'name', type: 'string' },
-        { name: 'version', type: 'string' },
-        { name: 'chainId', type: 'uint256' },
-    ];
-}
-
-// Suppress unused-import lint: createServer kept for future net-level helpers.
-void createServer;

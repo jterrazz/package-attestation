@@ -1,20 +1,6 @@
-/**
- * Self-contained HTML page served by the local CLI server. Opens MetaMask
- * (or any window.ethereum provider), requests EIP-712 v4 signature, POSTs
- * the result back to the localhost callback.
- *
- * No bundler, no external script — just a string template. Keeping this
- * pure-string makes it trivial to audit what gets shown to the wallet.
- */
-export function buildSignPageHtml(typedDataJson: string): string {
-    // TypedDataJson MUST already be a JSON string of EIP-712 v4 typed data
-    // (with `domain`, `types`, `primaryType`, `message`).
-    const escaped = typedDataJson
-        .replaceAll('\\', String.raw`\\`)
-        .replaceAll('`', '\\`')
-        .replaceAll(/<\/script>/giu, String.raw`<\/script>`);
+import { embeddedJson } from './embedded-json.js';
 
-    return `<!doctype html>
+const BEFORE_THE_DATA = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -34,7 +20,9 @@ export function buildSignPageHtml(typedDataJson: string): string {
 <p><button id="sign">Sign with wallet</button></p>
 <p id="status"></p>
 <script>
-    const TYPED_DATA = JSON.parse(\`${escaped}\`);
+    const TYPED_DATA = JSON.parse(\``;
+
+const AFTER_THE_DATA = `\`);
     document.getElementById('preview').textContent = JSON.stringify(TYPED_DATA.message, null, 2);
 
     document.getElementById('sign').addEventListener('click', async () => {
@@ -77,4 +65,8 @@ export function buildSignPageHtml(typedDataJson: string): string {
 </script>
 </body>
 </html>`;
+
+/** The page the CLI's loopback server shows: the typed data, and a button that asks the browser's wallet (`window.ethereum`) for an EIP-712 v4 signature, posted back to `/done`. No script is loaded, so what reaches the wallet reads in the page source. */
+export function buildSignPageHtml(typedDataJson: string): string {
+    return `${BEFORE_THE_DATA}${embeddedJson(typedDataJson)}${AFTER_THE_DATA}`;
 }

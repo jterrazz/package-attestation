@@ -1,18 +1,6 @@
-/**
- * HTML page served by the local CLI server during batch signing. Loads the
- * full list of EIP-712 typed-data messages, walks them sequentially, and POSTs
- * each signature back as MetaMask returns it. The server closes after the user
- * either signs the last entry or clicks "Done".
- */
-export function buildBatchSignPageHtml(
-    entries: { id: string; label: string; typedData: object }[],
-): string {
-    const escaped = JSON.stringify(entries)
-        .replaceAll('\\', String.raw`\\`)
-        .replaceAll('`', '\\`')
-        .replaceAll(/<\/script>/giu, String.raw`<\/script>`);
+import { embeddedJson } from './embedded-json.js';
 
-    return `<!doctype html>
+const BEFORE_THE_DATA = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -50,7 +38,9 @@ export function buildBatchSignPageHtml(
 </div>
 <ul class="entries" id="entries"></ul>
 <script>
-    const ENTRIES = JSON.parse(\`${escaped}\`);
+    const ENTRIES = JSON.parse(\``;
+
+const AFTER_THE_DATA = `\`);
     const ul = document.getElementById('entries');
     const lead = document.getElementById('lead');
     const progress = document.getElementById('progress');
@@ -146,4 +136,10 @@ export function buildBatchSignPageHtml(
 </script>
 </body>
 </html>`;
+
+/** The page the CLI's loopback server shows for a batch: every entry signed in turn by the browser's wallet, each signature posted to `/sig`, each refusal to `/skip`, and `/done` when the author is through. */
+export function buildBatchSignPageHtml(
+    entries: { id: string; label: string; typedData: object }[],
+): string {
+    return `${BEFORE_THE_DATA}${embeddedJson(JSON.stringify(entries))}${AFTER_THE_DATA}`;
 }
