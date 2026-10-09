@@ -1,4 +1,4 @@
-.PHONY: build lint lint-fix test test-network install clean
+.PHONY: install build lint fix test test-network mutation check
 
 node_modules/.install: package-lock.json
 	npm ci
@@ -9,17 +9,22 @@ install: node_modules/.install
 build: node_modules/.install
 	npm run build
 
-lint: node_modules/.install
+# invariant: the Publish (packaging) pass of the check reads dist/.
+lint: build
 	npm run lint
 
-lint-fix: node_modules/.install
-	npm run lint:fix
+fix: node_modules/.install
+	npx typescript fix
 
-test: node_modules/.install
+# invariant: the specs install the tarball npm pack writes from dist/.
+test: build
 	npm test
 
-test-network: node_modules/.install
+# outside: reaches the live OpenTimestamps calendars — `check` never calls it.
+test-network: build
 	npm run test:network
 
-clean:
-	rm -rf .artifacts dist
+mutation: build
+	npx typescript mutation
+
+check: lint test mutation

@@ -1,7 +1,4 @@
-// Browser-safe entry. Pure ESM, no Node-only imports (fs, http, crypto…).
-// All primitives go through @noble/hashes and viem, both of which run in any
-// Modern JS runtime (browsers, Node, Bun, Deno, Edge).
-
+// invariant: this entry runs in any modern JavaScript runtime, a browser tab included — nothing it reaches imports a Node module (fs, http, crypto) or OpenTimestamps; hashing and signatures go through @noble/hashes and viem.
 export { canonicalize, InvalidContentError } from './primitives/canonicalize.js';
 export { sha256Hex } from './primitives/sha256.js';
 export {
@@ -15,19 +12,19 @@ export {
 } from './primitives/eip712-schema.js';
 
 export { buildAttestationMessage, type CreateAttestationInput } from './attestation/create.js';
+export { type SignedAttestation, type StoredAttestation } from './attestation/record.js';
 export { fromStored, parse, stringify, toStored } from './attestation/serialize.js';
 export {
-    type SignedAttestation,
-    type StoredAttestation,
+    verifyAttestation,
     type VerifyError,
     type VerifyFail,
+    type VerifyInput,
     type VerifyOk,
     type VerifyResult,
-} from './attestation/types.js';
-export { verifyAttestation, type VerifyInput } from './attestation/verify.js';
+} from './attestation/verify.js';
 
 export { resolveEnsName } from './browser/ens.js';
-export { type AuthorshipState, type DateState, type ProofManifest } from './browser/types.js';
+export { type AuthorshipState, type DateState, type ProofManifest } from './browser/proof.js';
 export {
     verifyFromUrl,
     type VerifyFromUrlOptions,

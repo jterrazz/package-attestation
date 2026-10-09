@@ -9,11 +9,10 @@
         "url": "git+https://github.com/jterrazz/package-attestation.git"
     },
     "bin": {
-        "attestation": "bin/attestation"
+        "attestation": "./dist/attestation.js"
     },
     "files": [
-        "dist",
-        "bin"
+        "dist"
     ],
     "type": "module",
     "exports": {
@@ -28,15 +27,10 @@
         "./node": {
             "require": "./dist/node.cjs",
             "import": "./dist/node.js"
-        },
-        "./cli": {
-            "require": "./dist/cli.cjs",
-            "import": "./dist/cli.js"
         }
     },
     "scripts": {
-        "build": "tsdown --config tsdown.config.ts",
-        "prepare": "tsdown --config tsdown.config.ts",
+        "build": "typescript build",
         "lint": "typescript check",
         "lint:fix": "typescript fix",
         "test": "vitest --run",
@@ -49,10 +43,9 @@
         "viem": "^2.54.1"
     },
     "devDependencies": {
-        "@jterrazz/test": "^16.1.0",
-        "@jterrazz/typescript": "^10.3.1",
+        "@jterrazz/test": "file:../package-test",
+        "@jterrazz/typescript": "file:../package-typescript",
         "@types/node": "^24.13.2",
-        "tsdown": "^0.22.3",
         "vitest": "^5.0.1"
     },
     "engines": {

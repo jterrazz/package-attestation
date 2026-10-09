@@ -18,13 +18,13 @@ export {
     type CreateAttestationInput,
     signAttestation,
 } from './attestation/create.js';
+export { type SignedAttestation, type StoredAttestation } from './attestation/record.js';
 export { fromStored, parse, stringify, toStored } from './attestation/serialize.js';
 export {
-    type SignedAttestation,
-    type StoredAttestation,
+    verifyAttestation,
     type VerifyError,
     type VerifyFail,
+    type VerifyInput,
     type VerifyOk,
     type VerifyResult,
-} from './attestation/types.js';
-export { verifyAttestation, type VerifyInput } from './attestation/verify.js';
+} from './attestation/verify.js';
