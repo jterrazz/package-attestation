@@ -16,7 +16,7 @@ describe('upgrade', () => {
         // Then - the file named, and left as it was
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            → en.ots
+            · en.ots
               · No new attestation available yet, leaving file untouched.
         `);
     });
@@ -30,7 +30,7 @@ describe('upgrade', () => {
         {
             argv: `en.ots --skip-ots`,
             label: 'a flag it does not have',
-            refusal: `found: \`attestation upgrade\` has no flag --skip-ots · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it — attestation upgrade <ots-file> [<ots-file> …] · read: ${READ}upgrade`,
+            refusal: `found: \`attestation upgrade\` has no flag --skip-ots · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it; the usage is attestation upgrade <ots-file> [<ots-file> ...] · read: ${READ}upgrade`,
         },
         {
             argv: `gone.ots`,

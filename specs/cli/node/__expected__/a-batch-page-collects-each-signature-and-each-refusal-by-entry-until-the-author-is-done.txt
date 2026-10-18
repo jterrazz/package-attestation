@@ -64,7 +64,7 @@ skipped: [["second","User rejected the request."],["third","skipped"],["fourth",
     const runBtn = document.getElementById('run');
     const finishBtn = document.getElementById('finish');
 
-    lead.textContent = ENTRIES.length + ' article' + (ENTRIES.length === 1 ? '' : 's') + ' to sign. MetaMask will pop up once per article — review the typed data and confirm.';
+    lead.textContent = ENTRIES.length + ' article' + (ENTRIES.length === 1 ? '' : 's') + ' to sign. MetaMask will pop up once per article: review the typed data, then confirm.';
     progress.textContent = '0 / ' + ENTRIES.length;
 
     const rows = ENTRIES.map((e, i) => {

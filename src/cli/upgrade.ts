@@ -33,7 +33,7 @@ export async function runUpgrade(args: UpgradeArgs): Promise<void> {
     );
 
     for (const proof of proofs) {
-        process.stdout.write(`${fmt.info('→')} ${proof.path}\n`);
+        process.stdout.write(`${fmt.info('·')} ${proof.path}\n`);
         const { bytes, upgraded } = await upgradeProof(proof.bytes);
 
         // Stryker disable ConditionalExpression,BlockStatement,StringLiteral: a proof the calendars upgrade is reached only with the live calendars — make test-network

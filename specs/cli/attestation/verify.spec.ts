@@ -94,7 +94,7 @@ describe('verify', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             ✓ Content digest matches signature
-            ✓ Signature valid — signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+            ✓ Signature valid, signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             · OTS verification skipped
         `);
     });
@@ -111,7 +111,7 @@ describe('verify', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             ✓ Content digest matches signature
-            ✓ Signature valid — signed by 0x75117fE22ce373ec31d0Fe07638Afc25a525023b
+            ✓ Signature valid, signed by 0x75117fE22ce373ec31d0Fe07638Afc25a525023b
             Lite-client verification, assuming block hash-948625 is valid
             Lite-client verification, assuming block hash-948625 is valid
             Lite-client verification, assuming block hash-948655 is valid
@@ -132,12 +132,12 @@ describe('verify', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
             ✓ Content digest matches signature
-            ✓ Signature valid — signed by 0x75117fE22ce373ec31d0Fe07638Afc25a525023b
+            ✓ Signature valid, signed by 0x75117fE22ce373ec31d0Fe07638Afc25a525023b
             Lite-client verification, assuming block hash-948625 is valid
             Lite-client verification, assuming block hash-948625 is valid
             Lite-client verification, assuming block hash-948655 is valid
             Lite-client verification, assuming block hash-948647 is valid
-            ✗ OTS: invalid-proof — bitcoin verification failed: Digest does not match merkleroot
+            ✗ OTS: invalid-proof (bitcoin verification failed: Digest does not match merkleroot)
         `);
     });
 
@@ -155,7 +155,7 @@ describe('verify', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             ✓ Content digest matches signature
-            ✓ Signature valid — signed by 0x75117fE22ce373ec31d0Fe07638Afc25a525023b
+            ✓ Signature valid, signed by 0x75117fE22ce373ec31d0Fe07638Afc25a525023b
             Lite-client verification, assuming block hash-948625 is valid
             Lite-client verification, assuming block hash-948625 is valid
             Lite-client verification, assuming block hash-948655 is valid
@@ -175,7 +175,7 @@ describe('verify', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             ✓ Content digest matches signature
-            ✓ Signature valid — signed by 0x75117fE22ce373ec31d0Fe07638Afc25a525023b
+            ✓ Signature valid, signed by 0x75117fE22ce373ec31d0Fe07638Afc25a525023b
             · OTS verification skipped
         `);
     });
@@ -224,7 +224,7 @@ describe('verify', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             ✓ Content digest matches signature
-            ✓ Signature valid — signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+            ✓ Signature valid, signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             Ignoring attestation from calendar https://calendar.example.invalid: Calendar not in whitelist
             ✗ OTS: pending-bitcoin
         `);
@@ -243,8 +243,8 @@ describe('verify', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
             ✓ Content digest matches signature
-            ✓ Signature valid — signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-            ✗ OTS: invalid-proof — Not an OpenTimestamps proof: the bytes do not read as a detached timestamp file.
+            ✓ Signature valid, signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+            ✗ OTS: invalid-proof (Not an OpenTimestamps proof: the bytes do not read as a detached timestamp file.)
         `);
     });
 
@@ -261,7 +261,7 @@ describe('verify', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             ✓ Content digest matches signature
-            ✓ Signature valid — signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+            ✓ Signature valid, signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             · OTS verification skipped
         `);
     });
@@ -309,7 +309,7 @@ describe('verify', () => {
         {
             argv: `en.md --title T`,
             label: 'a flag of another command',
-            refusal: `found: \`attestation verify\` has no flag --title · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it — attestation verify <url|file> [--skip-ots] [--explorer <esplora-url>] · read: ${READ}verify`,
+            refusal: `found: \`attestation verify\` has no flag --title · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it; the usage is attestation verify <url|file> [--skip-ots] [--explorer <esplora-url>] · read: ${READ}verify`,
         },
         {
             argv: `./https://example.com/en.md`,
@@ -324,7 +324,7 @@ describe('verify', () => {
         {
             argv: `en.md`,
             label: 'an article with no attestation beside it',
-            refusal: `found: no file en.attestation.json · why: the signature is read from the attestation \`sign\` writes beside the article · fix: sign the article first (attestation sign en.md …), or verify its URL · read: ${READ}verify`,
+            refusal: `found: no file en.attestation.json · why: the signature is read from the attestation \`sign\` writes beside the article · fix: sign the article first (attestation sign en.md --title <t> --slug <s>), or verify its URL · read: ${READ}verify`,
         },
         {
             argv: `-`,

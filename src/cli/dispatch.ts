@@ -20,11 +20,11 @@ const SURFACES: Readonly<Record<CommandName, Surface>> = {
             title: true,
         },
         operand: '<file>',
-        usage: 'attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp]',
+        usage: 'attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x...>] [--skip-audit] [--skip-stamp]',
     },
     upgrade: {
         flags: {},
-        usage: 'attestation upgrade <ots-file> [<ots-file> …]',
+        usage: 'attestation upgrade <ots-file> [<ots-file> ...]',
     },
     verify: {
         flags: { explorer: true, 'skip-ots': false },
@@ -35,7 +35,7 @@ const SURFACES: Readonly<Record<CommandName, Surface>> = {
 
 const MAX_REVISION = 65_535;
 
-const TITLE = `${fmt.bold('attestation')} — sign articles with EIP-712 + Bitcoin (OpenTimestamps).`;
+const TITLE = `${fmt.bold('attestation')}: sign articles with EIP-712 + Bitcoin (OpenTimestamps).`;
 
 const HELP = `${TITLE}
 

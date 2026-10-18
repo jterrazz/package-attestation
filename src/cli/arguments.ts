@@ -55,7 +55,7 @@ function readOne(reading: Reading, argument: string, next: string | undefined): 
     const takesValue = spelled.startsWith('--') ? reading.surface.flags[flag] : undefined;
     if (takesValue === undefined) {
         throw refusal(reading, {
-            fix: `drop it — ${reading.surface.usage}`,
+            fix: `drop it; the usage is ${reading.surface.usage}`,
             found: `\`attestation ${reading.name}\` has no flag ${spelled}`,
             why: 'a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for',
         });

@@ -15,12 +15,12 @@ describe('attestation', () => {
 
             expect(result.exitCode).toBe(0);
             expect(result.stdout).toMatch(`
-                attestation — sign articles with EIP-712 + Bitcoin (OpenTimestamps).
+                attestation: sign articles with EIP-712 + Bitcoin (OpenTimestamps).
 
                 Usage:
-                  attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp]
+                  attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x...>] [--skip-audit] [--skip-stamp]
                   attestation verify <url|file> [--skip-ots] [--explorer <esplora-url>]
-                  attestation upgrade <ots-file> [<ots-file> …]
+                  attestation upgrade <ots-file> [<ots-file> ...]
             `);
         },
     );
@@ -28,7 +28,7 @@ describe('attestation', () => {
     test.each([
         {
             argv: 'sign --help',
-            usage: 'attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp]',
+            usage: 'attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x...>] [--skip-audit] [--skip-stamp]',
         },
         {
             argv: 'verify en.md -h',
@@ -36,7 +36,7 @@ describe('attestation', () => {
         },
         {
             argv: 'upgrade --nope --help',
-            usage: 'attestation upgrade <ots-file> [<ots-file> …]',
+            usage: 'attestation upgrade <ots-file> [<ots-file> ...]',
         },
     ])(
         // Given - one command asked for its usage as "$argv", whatever else the line holds
@@ -49,7 +49,7 @@ describe('attestation', () => {
 
             expect(result.exitCode).toBe(0);
             expect(result.stdout.text).toBe(
-                `attestation — sign articles with EIP-712 + Bitcoin (OpenTimestamps).\n\nUsage:\n  ${usage}\n`,
+                `attestation: sign articles with EIP-712 + Bitcoin (OpenTimestamps).\n\nUsage:\n  ${usage}\n`,
             );
         },
     );
@@ -64,12 +64,12 @@ describe('attestation', () => {
         expect(result.exitCode).toBe(2);
         expect(result.stderr).toMatch(`
             Unknown command: stamp
-            attestation — sign articles with EIP-712 + Bitcoin (OpenTimestamps).
+            attestation: sign articles with EIP-712 + Bitcoin (OpenTimestamps).
 
             Usage:
-              attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp]
+              attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x...>] [--skip-audit] [--skip-stamp]
               attestation verify <url|file> [--skip-ots] [--explorer <esplora-url>]
-              attestation upgrade <ots-file> [<ots-file> …]
+              attestation upgrade <ots-file> [<ots-file> ...]
         `);
         expect(result.stdout.text).toBe('');
     });

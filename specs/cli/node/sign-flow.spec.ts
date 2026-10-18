@@ -62,7 +62,7 @@ describe('sign-flow', () => {
                 document.getElementById('sign').addEventListener('click', async () => {
                     const status = document.getElementById('status');
                     status.className = '';
-                    status.textContent = 'Requesting account…';
+                    status.textContent = 'Requesting the account';
 
                     if (!window.ethereum) {
                         status.className = 'err';
@@ -74,13 +74,13 @@ describe('sign-flow', () => {
                         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                         const signer = accounts[0];
 
-                        status.textContent = 'Awaiting wallet confirmation…';
+                        status.textContent = 'Waiting for the wallet to confirm';
                         const signature = await window.ethereum.request({
                             method: 'eth_signTypedData_v4',
                             params: [signer, JSON.stringify(TYPED_DATA)],
                         });
 
-                        status.textContent = 'Submitting signature…';
+                        status.textContent = 'Submitting the signature';
                         const res = await fetch('/done', {
                             method: 'POST',
                             headers: { 'content-type': 'application/json' },

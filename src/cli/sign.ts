@@ -51,8 +51,8 @@ export async function runSign(args: SignArgs): Promise<void> {
         slug: args.slug,
         title: args.title,
     });
-    process.stdout.write(`${fmt.info('→')} Content digest: ${message.subject.contentDigest}\n`);
-    process.stdout.write(`${fmt.info('→')} Opening browser to sign with your wallet…\n`);
+    process.stdout.write(`${fmt.info('·')} Content digest: ${message.subject.contentDigest}\n`);
+    process.stdout.write(`${fmt.info('·')} Opening the browser to sign with your wallet\n`);
 
     const signed = { ...message, ...(await signViaBrowser({ message })) };
     const verdict = await verifyAttestation({ attestation: signed, content });
@@ -70,11 +70,11 @@ export async function runSign(args: SignArgs): Promise<void> {
     await writeFile(`${stem}.attestation.json`, stringify(signed));
     process.stdout.write(`${checkmark()} Wrote ${stem}.attestation.json\n`);
     process.stdout.write(
-        `${fmt.info('→')} Attestation digest (a next revision's --prior-attestation): ${attestationDigest(signed)}\n`,
+        `${fmt.info('·')} Attestation digest (a next revision's --prior-attestation): ${attestationDigest(signed)}\n`,
     );
 
     if (args.skipStamp !== true) {
-        process.stdout.write(`${fmt.info('→')} Submitting to OpenTimestamps calendars…\n`);
+        process.stdout.write(`${fmt.info('·')} Submitting to the OpenTimestamps calendars\n`);
         const proof = await stampDigest(hexToBytes(message.subject.contentDigest));
         // Stryker disable StringLiteral: a proof some calendar answered is reached only with the live calendars — make test-network
         await writeFile(`${stem}.ots`, proof);

@@ -39,7 +39,7 @@ export async function runVerify(args: VerifyArgs): Promise<boolean> {
     }
     process.stdout.write(`${checkmark()} Content digest matches signature\n`);
     process.stdout.write(
-        `${checkmark()} Signature valid — signed by ${fmt.bold(signature.signerAddress)}\n`,
+        `${checkmark()} Signature valid, signed by ${fmt.bold(signature.signerAddress)}\n`,
     );
 
     if (args.skipOts === true || sources.otsBytes === null) {
@@ -56,7 +56,7 @@ export async function runVerify(args: VerifyArgs): Promise<boolean> {
         );
         return true;
     }
-    const details = date.details === undefined ? '' : ` — ${date.details}`;
+    const details = date.details === undefined ? '' : ` (${date.details})`;
     process.stdout.write(`${crossmark()} OTS: ${date.reason}${details}\n`);
     return date.reason === 'pending-bitcoin';
 }
@@ -69,7 +69,7 @@ async function loadFromFile(path: string): Promise<Sources> {
         why: 'the signature is checked against the content of that file',
     });
     const attestationJson = await readNamed(`${stem}.attestation.json`, {
-        fix: `sign the article first (attestation sign ${path} …), or verify its URL`,
+        fix: `sign the article first (attestation sign ${path} --title <t> --slug <s>), or verify its URL`,
         read: 'verify',
         why: 'the signature is read from the attestation `sign` writes beside the article',
     });

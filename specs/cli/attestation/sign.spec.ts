@@ -46,11 +46,11 @@ describe('sign', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             ✓ Canonicalized 53 bytes (en)
-            → Content digest: 0x0c756fb254e676df5d0c429a6d7120a86ab9dfff689c6ad913fd53811b9dd1fe
-            → Opening browser to sign with your wallet…
+            · Content digest: 0x0c756fb254e676df5d0c429a6d7120a86ab9dfff689c6ad913fd53811b9dd1fe
+            · Opening the browser to sign with your wallet
             ✓ Signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             ✓ Wrote en.attestation.json
-            → Attestation digest (a next revision's --prior-attestation): 0x129fbbdceeaf6ee2b4f00d741c2ebd3ae059ce79ecf85e8689ab425111c37937
+            · Attestation digest (a next revision's --prior-attestation): 0x129fbbdceeaf6ee2b4f00d741c2ebd3ae059ce79ecf85e8689ab425111c37937
         `);
         expect(text(result.file('en.attestation.json').content)).toMatch(`
             {
@@ -174,11 +174,11 @@ describe('sign', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             ✓ Canonicalized 53 bytes (en)
-            → Content digest: 0x0c756fb254e676df5d0c429a6d7120a86ab9dfff689c6ad913fd53811b9dd1fe
-            → Opening browser to sign with your wallet…
+            · Content digest: 0x0c756fb254e676df5d0c429a6d7120a86ab9dfff689c6ad913fd53811b9dd1fe
+            · Opening the browser to sign with your wallet
             ✓ Signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             ✓ Wrote en.attestation.json
-            → Attestation digest (a next revision's --prior-attestation): 0x{{sha}}
+            · Attestation digest (a next revision's --prior-attestation): 0x{{sha}}
         `);
     });
 
@@ -198,12 +198,12 @@ describe('sign', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
             ✓ Canonicalized 53 bytes (en)
-            → Content digest: 0x0c756fb254e676df5d0c429a6d7120a86ab9dfff689c6ad913fd53811b9dd1fe
-            → Opening browser to sign with your wallet…
+            · Content digest: 0x0c756fb254e676df5d0c429a6d7120a86ab9dfff689c6ad913fd53811b9dd1fe
+            · Opening the browser to sign with your wallet
             ✓ Signed by 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             ✓ Wrote en.attestation.json
-            → Attestation digest (a next revision's --prior-attestation): 0xd00daef9022552a175f58f59e74d443b03475b7c93989cda264870191ade093c
-            → Submitting to OpenTimestamps calendars…
+            · Attestation digest (a next revision's --prior-attestation): 0xd00daef9022552a175f58f59e74d443b03475b7c93989cda264870191ade093c
+            · Submitting to the OpenTimestamps calendars
             Submitting to remote calendar https://a.pool.opentimestamps.org
             Submitting to remote calendar https://b.pool.opentimestamps.org
             Submitting to remote calendar https://a.pool.eternitywall.com
@@ -302,12 +302,12 @@ describe('sign', () => {
         {
             argv: `en.md --title T --slug s --explorer x`,
             label: 'a flag of another command',
-            refusal: `found: \`attestation sign\` has no flag --explorer · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it — attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp] · read: ${READ}sign`,
+            refusal: `found: \`attestation sign\` has no flag --explorer · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it; the usage is attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x...>] [--skip-audit] [--skip-stamp] · read: ${READ}sign`,
         },
         {
             argv: `en.md --title T --slug s -t`,
             label: 'a short flag it does not have',
-            refusal: `found: \`attestation sign\` has no flag -t · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it — attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp] · read: ${READ}sign`,
+            refusal: `found: \`attestation sign\` has no flag -t · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it; the usage is attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x...>] [--skip-audit] [--skip-stamp] · read: ${READ}sign`,
         },
         {
             argv: `en.md fr.md --title T --slug s`,
@@ -372,7 +372,7 @@ describe('sign', () => {
         {
             argv: `en.md --title T -Xskip-stamp --slug s`,
             label: 'a flag behind one dash',
-            refusal: `found: \`attestation sign\` has no flag -Xskip-stamp · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it — attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x…>] [--skip-audit] [--skip-stamp] · read: ${READ}sign`,
+            refusal: `found: \`attestation sign\` has no flag -Xskip-stamp · why: a flag the command does not have is a typo or meant for another command, and the run would not be the one asked for · fix: drop it; the usage is attestation sign <file> --title <t> --slug <s> [--locale <l>] [--published-at <iso>] [--revision <n>] [--prior-attestation <0x...>] [--skip-audit] [--skip-stamp] · read: ${READ}sign`,
         },
     ])(
         // Given - the binary asked to sign with $label
