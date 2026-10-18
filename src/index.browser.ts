@@ -1,4 +1,4 @@
-// invariant: this entry runs in any modern JavaScript runtime, a browser tab included — nothing it reaches imports a Node module (fs, http, crypto) or OpenTimestamps; hashing and signatures go through @noble/hashes and viem.
+// invariant: this entry runs in any modern JavaScript runtime, a browser tab included: nothing it reaches imports a Node module (fs, http, crypto) or OpenTimestamps; hashing and signatures go through @noble/hashes and viem.
 export { canonicalize, InvalidContentError } from './primitives/canonicalize.js';
 export { sha256Hex } from './primitives/sha256.js';
 export {

@@ -71,7 +71,7 @@ export async function fetchOk(fetchFn: typeof fetch, url: string): Promise<Respo
     return response;
 }
 
-// hazard: the shape is the type's, member for member — a member ProofManifest gains and PROOF_MANIFEST forgets is never checked.
+// hazard: the shape is the type's, member for member: a member ProofManifest gains and PROOF_MANIFEST forgets is never checked.
 function isProofManifest(value: unknown): value is ProofManifest {
     return hasShape(value, PROOF_MANIFEST);
 }

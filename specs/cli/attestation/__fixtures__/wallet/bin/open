@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// outside: stands in for the browser and its wallet on PATH — it reads the typed data the opened page serves, signs it with Hardhat's account, and posts the signature back; CLAIMED_SIGNER makes it claim another address than the one that signed.
+// outside: stands in for the browser and its wallet on PATH: it reads the typed data the opened page serves, signs it with Hardhat's account, and posts the signature back; CLAIMED_SIGNER makes it claim another address than the one that signed.
 import { hardhatAccount } from '../hardhat.mjs';
 
 const url = process.argv.at(-1);

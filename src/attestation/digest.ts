@@ -7,7 +7,7 @@ import {
 } from '../primitives/eip712-schema.js';
 import type { AttestationMessage } from '../primitives/eip712-schema.js';
 
-/** The reference a later revision gives as its `claims.priorAttestation`: the EIP-712 digest of the attestation's message — the very hash its author signed, so it is the same whichever way the record was serialized. */
+/** The reference a later revision gives as its `claims.priorAttestation`: the EIP-712 digest of the attestation's message. It is the very hash its author signed, so it is the same whichever way the record was serialized. */
 export function attestationDigest(attestation: AttestationMessage): `0x${string}` {
     return hashTypedData({
         domain: ATTESTATION_DOMAIN_V1,

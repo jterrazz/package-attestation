@@ -9,7 +9,7 @@ import {
 } from '../../../src/primitives/eip712-schema.js';
 import { integration } from '../integration.specification.js';
 
-// invariant: both goldens are frozen — a struct renamed, a field reordered or a type widened moves the digest every v1 signature was taken over.
+// invariant: both goldens are frozen: a struct renamed, a field reordered or a type widened moves the digest every v1 signature was taken over.
 describe('schema', () => {
     test('the v1 type table is exactly the shape the signature hashes', async () => {
         // Given - the type table the v1 schema declares

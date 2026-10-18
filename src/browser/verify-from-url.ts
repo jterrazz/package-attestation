@@ -9,7 +9,7 @@ import type { AuthorshipState, DateState, ProofManifest } from './proof.js';
 export type VerifyFromUrlOptions = {
     /** Skips the Bitcoin leg: the date is reported `skipped`, `opt-out`. */
     skipOts?: boolean;
-    /** The fetch every request goes through — a proxy, a test double; the global one by default. */
+    /** The fetch every request goes through (a proxy, a test double); the global one by default. */
     fetchFn?: typeof fetch;
 };
 

@@ -7,7 +7,7 @@ import { verifyAttestation } from '../../../src/attestation/verify.js';
 import { testAccount } from '../__setup__/wallet.js';
 import { integration } from '../integration.specification.js';
 
-// invariant: the goldens are frozen — the record each holds IS what lands on disk beside an article, so a rewrite would leave the attestations published there unverifiable.
+// invariant: the goldens are frozen: the record each holds IS what lands on disk beside an article, so a rewrite would leave the attestations published there unverifiable.
 const ARTICLES = [
     { content: 'plain ASCII article body.', locale: 'en', slug: 'plain' },
     { content: 'avec accents éàùç et 🦊', locale: 'fr', slug: 'unicode' },

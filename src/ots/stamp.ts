@@ -13,7 +13,7 @@ export async function stampDigest(digest: Uint8Array): Promise<Uint8Array> {
     const detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), digest);
     await OpenTimestamps.stamp(detached);
     // outside: the library resolves even when every calendar failed, with a proof that attests nothing.
-    // Stryker disable next-line ConditionalExpression: a stamp some calendar answered is reached only with the live calendars — make test-network
+    // Stryker disable next-line ConditionalExpression: a stamp some calendar answered is reached only with the live calendars (make test-network)
     if (detached.timestamp.getAttestations().size === 0) {
         throw new Error('No OpenTimestamps calendar answered: the proof would attest nothing.');
     }

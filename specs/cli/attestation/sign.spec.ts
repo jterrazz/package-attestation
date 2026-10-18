@@ -21,7 +21,7 @@ const READ = 'https://github.com/jterrazz/package-attestation/blob/main/docs/ref
 
 const PRIOR = `0x${'12ab'.repeat(16)}`;
 
-// outside: the OpenTimestamps library's HTTP client honours the proxy variables, so a refusing proxy is every calendar down — nothing leaves the machine.
+// outside: the OpenTimestamps library's HTTP client honours the proxy variables, so a refusing proxy is every calendar down, and nothing leaves the machine.
 const NO_CALENDAR = {
     HTTPS_PROXY: 'http://127.0.0.1:9',
     NO_PROXY: null,

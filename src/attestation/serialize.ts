@@ -57,7 +57,7 @@ export function parse(json: string): SignedAttestation {
     return fromStored(value);
 }
 
-// hazard: the shape is the type's, member for member — a member StoredAttestation gains and STORED_ATTESTATION forgets is never checked.
+// hazard: the shape is the type's, member for member: a member StoredAttestation gains and STORED_ATTESTATION forgets is never checked.
 function isStoredAttestation(value: unknown): value is StoredAttestation {
     return hasShape(value, STORED_ATTESTATION);
 }

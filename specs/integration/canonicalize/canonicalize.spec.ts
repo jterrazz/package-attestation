@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest';
 import { canonicalize } from '../../../src/primitives/canonicalize.js';
 import { integration } from '../integration.specification.js';
 
-// invariant: every golden is frozen — TEST_UPDATE rewriting one is the very event that leaves each attestation signed against v1 unverifiable; a case retires only with a CANONICAL_VERSION 2 beside v1.
+// invariant: every golden is frozen: TEST_UPDATE rewriting one is the very event that leaves each attestation signed against v1 unverifiable; a case retires only with a CANONICAL_VERSION 2 beside v1.
 const CASES = [
     { input: '', name: '01-empty' },
     { input: '# Hello\n\nWorld.', name: '02-plain-ascii' },

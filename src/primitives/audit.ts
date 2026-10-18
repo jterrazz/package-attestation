@@ -22,7 +22,7 @@ export type AuditFinding = {
     name: string;
 };
 
-// invariant: the audit is the signing author's advice and never a verifier's rule — a verifier stays a function of canonicalize() alone, so an honestly signed attestation never fails a newer verifier.
+// invariant: the audit is the signing author's advice and never a verifier's rule. A verifier stays a function of canonicalize() alone, so an honestly signed attestation never fails a newer verifier.
 /** The invisible and directional characters of canonical bytes, each with its line and column. */
 export function audit(canonical: Uint8Array): AuditFinding[] {
     const text = new TextDecoder('utf-8', { fatal: true }).decode(canonical);

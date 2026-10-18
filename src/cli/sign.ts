@@ -76,7 +76,7 @@ export async function runSign(args: SignArgs): Promise<void> {
     if (args.skipStamp !== true) {
         process.stdout.write(`${fmt.info('·')} Submitting to the OpenTimestamps calendars\n`);
         const proof = await stampDigest(hexToBytes(message.subject.contentDigest));
-        // Stryker disable StringLiteral: a proof some calendar answered is reached only with the live calendars — make test-network
+        // Stryker disable StringLiteral: a proof some calendar answered is reached only with the live calendars (make test-network)
         await writeFile(`${stem}.ots`, proof);
         process.stdout.write(
             `${checkmark()} Wrote ${stem}.ots (${proof.length} bytes, calendar-only)\n`,

@@ -6,7 +6,7 @@ import { proofFileOf } from './proof-file.js';
 const { DetachedTimestampFile, Ops } = OpenTimestamps;
 
 export type OtsVerifyOptions = {
-    /** An Esplora-compatible explorer the Bitcoin block lookup asks instead of the library's public default — a node of your own, or a double. */
+    /** An Esplora-compatible explorer the Bitcoin block lookup asks instead of the library's public default: a node of your own, or a double. */
     explorerUrl?: string | undefined;
 };
 
@@ -54,13 +54,13 @@ export async function verifyOts(
     }
 }
 
-// Stryker disable StringLiteral,ConditionalExpression,BlockStatement: without an explorer the library asks a local Bitcoin node, then the public explorer — the network, which no offline spec reaches; the two paths differ only there
+// Stryker disable StringLiteral,ConditionalExpression,BlockStatement: without an explorer the library asks a local Bitcoin node, then the public explorer, both on the network, which no offline spec reaches; the two paths differ only there
 function explorerOptions({ explorerUrl = '' }: OtsVerifyOptions): object {
     if (explorerUrl === '') {
         return {};
     }
     // Stryker restore all
-    // outside: the library reads `ignoreBitcoinNode` (its docs say `ignore_bitcoin_node`), and its explorer timeout, documented in seconds, reaches its HTTP client as milliseconds — 10 s.
+    // outside: the library reads `ignoreBitcoinNode` (its docs say `ignore_bitcoin_node`), and its explorer timeout, documented in seconds, reaches its HTTP client as milliseconds (10 s).
     // Stryker disable next-line BooleanLiteral: the library's local-node lookup is dead today (its readBitcoinConf reads array indices, never a file), so the flag changes nothing yet; it keeps a fixed library from asking a local node before the explorer named
     return { esplora: { timeout: 10_000, url: explorerUrl }, ignoreBitcoinNode: true };
 }

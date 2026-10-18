@@ -20,7 +20,7 @@ fix: node_modules/.install
 test: build
 	npm test
 
-# outside: reaches the live OpenTimestamps calendars — `check` never calls it.
+# outside: reaches the live OpenTimestamps calendars, so `check` never calls it.
 test-network: build
 	npm run test:network
 

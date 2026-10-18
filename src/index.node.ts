@@ -1,4 +1,4 @@
-// invariant: the Node-only surface — OpenTimestamps, the wallet's loopback server — kept out of the browser entry, so a bundler resolving `@jterrazz/attestation/browser` never reaches it.
+// invariant: the Node-only surface (OpenTimestamps, the wallet's loopback server) is kept out of the browser entry, so a bundler resolving `@jterrazz/attestation/browser` never reaches it.
 export { stampDigest, upgradeProof } from './ots/stamp.js';
 export {
     type OtsVerifyFail,

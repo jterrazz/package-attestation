@@ -21,7 +21,7 @@ export type LoopbackOptions<Value> = {
 
 export const NOT_FOUND = { body: 'Not found', status: 404 } as const;
 
-/** Serves one flow on a free port of 127.0.0.1 alone, hands its URL to `onUrlReady`, and settles with the first answer that settles it — or rejects when the time runs out, the server fails, or `onUrlReady` throws. */
+/** Serves one flow on a free port of 127.0.0.1 alone, hands its URL to `onUrlReady`, and settles with the first answer that settles it, or rejects when the time runs out, the server fails, or `onUrlReady` throws. */
 export async function serveOnLoopback<Value>(options: LoopbackOptions<Value>): Promise<Value> {
     const { promise, reject, resolve } = Promise.withResolvers<Value>();
     const server = createServer((request, response) => {

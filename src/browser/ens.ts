@@ -7,7 +7,7 @@ const client = createPublicClient({
     transport: http('https://ethereum-rpc.publicnode.com'),
 });
 
-/** The primary ENS name of an address, for display only — never part of an attestation — or null when the lookup fails or none is set. */
+/** The primary ENS name of an address, for display only and never part of an attestation, or null when the lookup fails or none is set. */
 export async function resolveEnsName(address: `0x${string}`): Promise<null | string> {
     try {
         return await client.getEnsName({ address });

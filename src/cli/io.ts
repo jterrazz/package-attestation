@@ -1,4 +1,4 @@
-// outside: NO_COLOR (no-color.org) — any non-empty value turns colour off, as does an output that is no terminal.
+// outside: NO_COLOR (no-color.org): any non-empty value turns colour off, as does an output that is no terminal.
 const supportsColor = process.stdout.isTTY && (process.env.NO_COLOR ?? '') === '';
 
 const paint =

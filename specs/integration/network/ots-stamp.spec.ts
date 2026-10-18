@@ -5,7 +5,7 @@ import { stampDigest } from '../../../src/ots/stamp.js';
 import { verifyOts } from '../../../src/ots/verify.js';
 import { integration } from '../integration.specification.js';
 
-// outside: the live OpenTimestamps calendars — the one suite that leaves the machine, collected only under ATTEST_E2E_NETWORK (`make test-network`); a calendar's proof is new on every run, so nothing here is goldened.
+// outside: the live OpenTimestamps calendars. This is the one suite that leaves the machine, collected only under ATTEST_E2E_NETWORK (`make test-network`); a calendar's proof is new on every run, so nothing here is goldened.
 describe('ots-stamp', () => {
     test('a fresh digest comes back stamped, and pending its Bitcoin attestation', async () => {
         // Given - a digest no calendar has seen, submitted to the real ones

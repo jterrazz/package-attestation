@@ -7,7 +7,7 @@ import { verifyAttestation } from '../../../src/attestation/verify.js';
 import { testAccount } from '../__setup__/wallet.js';
 import { integration } from '../integration.specification.js';
 
-// invariant: the three goldens are frozen — a drift means canonicalize, the EIP-712 schema or viem's deterministic ECDSA changed, each of which breaks every attestation ever published.
+// invariant: the three goldens are frozen: a drift means canonicalize, the EIP-712 schema or viem's deterministic ECDSA changed, each of which breaks every attestation ever published.
 const FROZEN_ARTICLE = {
     content: '# Architects of Inversion\n\nThe world that follows...\n',
     locale: 'en',

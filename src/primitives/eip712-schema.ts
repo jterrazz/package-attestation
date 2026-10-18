@@ -1,4 +1,4 @@
-// invariant: frozen — every byte of the domain and the types is part of the digest each v1 signature was taken over; a v2 is added beside with a new SCHEMA_VERSION, verified by dispatching on schemaVersion, and v1's verifier stays.
+// invariant: frozen. Every byte of the domain and the types is part of the digest each v1 signature was taken over; a v2 is added beside with a new SCHEMA_VERSION, verified by dispatching on schemaVersion, and v1's verifier stays.
 
 export const ATTESTATION_DOMAIN_V1 = {
     chainId: 1,
