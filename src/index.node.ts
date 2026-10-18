@@ -12,6 +12,6 @@ export {
     type BatchSignEntry,
     type BatchSignFlowOptions,
     type BatchSignFlowResult,
-    signBatchViaBrowser,
 } from './eth/sign-batch-flow.js';
-export { type SignFlowOptions, type SignFlowResult, signViaBrowser } from './eth/sign-flow.js';
+export { signBatchViaBrowser, signViaBrowser } from './eth/browser.js';
+export { type SignFlowOptions, type SignFlowResult } from './eth/sign-flow.js';

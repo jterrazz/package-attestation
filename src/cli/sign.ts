@@ -6,7 +6,7 @@ import { buildAttestationMessage } from '../attestation/create.js';
 import { attestationDigest } from '../attestation/digest.js';
 import { stringify } from '../attestation/serialize.js';
 import { verifyAttestation } from '../attestation/verify.js';
-import { signViaBrowser } from '../eth/sign-flow.js';
+import { signViaBrowser } from '../eth/browser.js';
 import { stampDigest } from '../ots/stamp.js';
 import { audit } from '../primitives/audit.js';
 import type { AuditFinding } from '../primitives/audit.js';

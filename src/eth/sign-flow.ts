@@ -1,5 +1,4 @@
 import type { AttestationMessage } from '../primitives/eip712-schema.js';
-import { openInBrowser } from './browser.js';
 import { NOT_FOUND, serveOnLoopback } from './loopback.js';
 import type { Answer } from './loopback.js';
 import { buildSignPageHtml } from './sign-page-html.js';
@@ -16,10 +15,15 @@ export type SignFlowOptions = {
 
 export type SignFlowResult = WalletSignature;
 
+/** The flow with its opener named: it never defaults to the visible browser itself. */
+export type OpenedSignFlow = SignFlowOptions & {
+    onUrlReady: (url: string) => Promise<void> | void;
+};
+
 const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
 
-/** Serves a page on 127.0.0.1 that asks the browser's wallet to sign the message, and resolves with the signature it posts back to `/done`; a malformed post is answered 400 and the page may retry. */
-export async function signViaBrowser(opts: SignFlowOptions): Promise<SignFlowResult> {
+/** `signViaBrowser` with its opener named, which `./browser.ts` alone hands the default browser. */
+export async function serveSignFlow(opts: OpenedSignFlow): Promise<SignFlowResult> {
     const html = buildSignPageHtml(JSON.stringify(typedDataOf(opts.message)));
     const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
@@ -33,7 +37,7 @@ export async function signViaBrowser(opts: SignFlowOptions): Promise<SignFlowRes
             }
             return NOT_FOUND;
         },
-        onUrlReady: opts.onUrlReady ?? openInBrowser,
+        onUrlReady: opts.onUrlReady,
         timeoutMessage: `Sign flow timed out after ${timeoutMs}ms`,
         timeoutMs,
     });

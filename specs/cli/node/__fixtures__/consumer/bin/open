@@ -1,0 +1,4 @@
+#!/bin/sh
+# outside: stands in for the default browser on PATH: a consumer that names its own opener never reaches it, so it records the URL it was asked to open, in the working directory the spec reads, and refuses.
+printf '%s\n' "$*" >> opened.txt
+exit 1

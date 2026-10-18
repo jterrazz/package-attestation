@@ -1,21 +1,7 @@
 import { directory, packed, text } from '@jterrazz/test';
-import { dirname } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { cli } from '../cli.specification.js';
-
-// invariant: the wallet is a stand-in on PATH, first, and nothing else that opens a window is reachable: no /usr/bin, where macOS keeps `open`; on Linux the bundled xdg-open hands the URL to $BROWSER.
-const HEADLESS = {
-    BROWSER: '$WORKDIR/bin/open',
-    DISPLAY: null,
-    PATH: [
-        '$WORKDIR/bin',
-        dirname(process.execPath),
-        '/bin',
-        ...(process.platform === 'linux' ? ['/usr/bin'] : []),
-    ].join(':'),
-    XDG_CURRENT_DESKTOP: null,
-};
+import { cli, HEADLESS } from '../cli.specification.js';
 
 const READ = 'https://github.com/jterrazz/package-attestation/blob/main/docs/reference/cli.md#';
 

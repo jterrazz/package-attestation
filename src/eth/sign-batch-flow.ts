@@ -1,6 +1,5 @@
 import type { AttestationMessage } from '../primitives/eip712-schema.js';
 import { isRecord } from '../primitives/shape.js';
-import { openInBrowser } from './browser.js';
 import { NOT_FOUND, serveOnLoopback } from './loopback.js';
 import type { Answer } from './loopback.js';
 import { buildBatchSignPageHtml } from './sign-batch-page-html.js';
@@ -31,15 +30,18 @@ export type BatchSignFlowResult = {
     skipped: Map<string, string>;
 };
 
+/** The flow with its opener named: it never defaults to the visible browser itself. */
+export type OpenedBatchSignFlow = BatchSignFlowOptions & {
+    onUrlReady: (url: string) => Promise<void> | void;
+};
+
 const DEFAULT_TIMEOUT_MS = 30 * 60 * 1000;
 
 const OK = { body: 'OK', status: 200 } as const;
 const INVALID = { body: 'Invalid payload', status: 400 } as const;
 
-/** Serves a page on 127.0.0.1 that walks the entries through the browser's wallet one by one: each signature is posted to `/sig`, each refusal to `/skip`, and `/done` resolves with both. */
-export async function signBatchViaBrowser(
-    opts: BatchSignFlowOptions,
-): Promise<BatchSignFlowResult> {
+/** `signBatchViaBrowser` with its opener named, which `./browser.ts` alone hands the default browser. */
+export async function serveBatchSignFlow(opts: OpenedBatchSignFlow): Promise<BatchSignFlowResult> {
     const html = buildBatchSignPageHtml(
         opts.entries.map(({ id, label, message }) => ({
             id,
@@ -66,7 +68,7 @@ export async function signBatchViaBrowser(
             }
             return NOT_FOUND;
         },
-        onUrlReady: opts.onUrlReady ?? openInBrowser,
+        onUrlReady: opts.onUrlReady,
         timeoutMessage: `Batch sign flow timed out after ${timeoutMs}ms`,
         timeoutMs,
     });

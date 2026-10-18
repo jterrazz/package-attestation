@@ -1,7 +1,7 @@
 import { directory, packed } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { cli } from '../cli.specification.js';
+import { cli, HEADLESS } from '../cli.specification.js';
 
 describe('sign-flow', () => {
     test('the wallet page is served on the loopback, and only a well-formed signature ends the flow', async () => {
@@ -10,10 +10,12 @@ describe('sign-flow', () => {
             .link('@jterrazz/attestation', packed())
             .fixture(directory('./__fixtures__/consumer/'))
             .fixture(directory('../__fixtures__/hardhat/'))
+            .env(HEADLESS)
             .exec('sign-flow.mjs');
 
-        // Then - each request's answer, the signature the flow resolved with, the page, and the flows that never finish
+        // Then - the default browser was never asked, and each request's answer, the signature the flow resolved with, the page, and the flows that never finish
         expect(result.exitCode).toBe(0);
+        expect(result.file('opened.txt').exists).toBe(false);
         expect(result.stdout).toMatch(`
             served on http://127.0.0.1:PORT/
             GET /index.html → 200 text/html; charset=utf-8 (page)
