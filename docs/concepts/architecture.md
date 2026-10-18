@@ -1,6 +1,6 @@
 # Architecture
 
-Three entries and one binary share one `src/`, split by what each is allowed to import — the shape that lets a browser bundle carry only what a browser can run.
+Three entries and one binary share one `src/`, split by what each is allowed to import. That shape lets a browser bundle carry only what a browser can run.
 
 | Entry                           | Source                   | Runs in     | Carries                                                                                 |
 | ------------------------------- | ------------------------ | ----------- | --------------------------------------------------------------------------------------- |
@@ -9,18 +9,18 @@ Three entries and one binary share one `src/`, split by what each is allowed to 
 | `@jterrazz/attestation/node`    | `src/index.node.ts`      | Node        | OpenTimestamps (`stampDigest`, `upgradeProof`, `verifyOts`) and the wallet's sign flows |
 | the `attestation` binary        | `src/attestation.bin.ts` | Node        | `sign`, `verify`, `upgrade` ([The CLI](../reference/cli.md))                            |
 
-Nothing declares the build: `typescript build` reads the manifest — each `exports` subpath under its `import` and `require` conditions, and the `bin` — and compiles each target from the source its name gives by convention, ESM and CommonJS with their declarations ([`@jterrazz/typescript`'s Building](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/building.md)). The binary's source carries its `#!/usr/bin/env node` line, which the build keeps.
+Nothing declares the build: `typescript build` reads the manifest (each `exports` subpath under its `import` and `require` conditions, and the `bin`) and compiles each target from the source its name gives by convention, ESM and CommonJS with their declarations ([`@jterrazz/typescript`'s Building](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/building.md)). The binary's source carries its `#!/usr/bin/env node` line, which the build keeps.
 
 ## The folders under `src/`
 
-| Folder             | Owns                                                                                                                                                            |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/primitives/`  | `canonicalize`, `audit`, `sha256Hex`, the EIP-712 schema, and the two helpers every reader of JSON shares (`hasShape`, `messageOf`) — pure and runtime-agnostic |
-| `src/attestation/` | the record (`record.ts`), building and signing it (`create.ts`), writing and reading it (`serialize.ts`), verifying it (`verify.ts`)                            |
-| `src/browser/`     | `verifyFromUrl`, the `proof.json` manifest a published article serves, ENS display names — no Node module allowed                                               |
-| `src/ots/`         | OpenTimestamps: stamp, upgrade, verify, and the typings of the untyped library — Node-only                                                                      |
-| `src/eth/`         | the wallet's sign flows: a one-shot server on 127.0.0.1, the pages it serves, the EIP-712 v4 payload a browser wallet signs                                     |
-| `src/cli/`         | the `attestation` binary: dispatch, `sign`, `verify`, `upgrade`, terminal output                                                                                |
+| Folder             | Owns                                                                                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/primitives/`  | `canonicalize`, `audit`, `sha256Hex`, the EIP-712 schema, and the two helpers every reader of JSON shares (`hasShape`, `messageOf`), pure and runtime-agnostic |
+| `src/attestation/` | the record (`record.ts`), building and signing it (`create.ts`), writing and reading it (`serialize.ts`), verifying it (`verify.ts`)                           |
+| `src/browser/`     | `verifyFromUrl`, the `proof.json` manifest a published article serves, ENS display names; no Node module allowed                                               |
+| `src/ots/`         | OpenTimestamps: stamp, upgrade, verify, and the typings of the untyped library; Node-only                                                                      |
+| `src/eth/`         | the wallet's sign flows: a one-shot server on 127.0.0.1, the pages it serves, the EIP-712 v4 payload a browser wallet signs                                    |
+| `src/cli/`         | the `attestation` binary: dispatch, `sign`, `verify`, `upgrade`, terminal output                                                                               |
 
 ## The boundary the browser entry keeps
 
@@ -34,5 +34,5 @@ Two things carry a version and are immutable once a single attestation using the
 
 ## Related
 
-- [Develop](../guides/develop.md) — where a new file goes inside this layout.
-- [Signing and anchoring](signing-and-anchoring.md) — what each folder computes.
+- [Develop](../guides/develop.md): where a new file goes inside this layout.
+- [Signing and anchoring](signing-and-anchoring.md): what each folder computes.

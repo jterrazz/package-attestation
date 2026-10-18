@@ -1,6 +1,6 @@
 # @jterrazz/attestation
 
-Cryptographic attestation for articles — an EIP-712 signature over the canonicalized content, anchored to Bitcoin via OpenTimestamps. Prove an article existed, unmodified, at a point in time, signed by its author.
+Cryptographic attestation for articles: an EIP-712 signature over the canonicalized content, anchored to Bitcoin via OpenTimestamps. Prove an article existed, unmodified, at a point in time, signed by its author.
 
 ## Entries
 
@@ -9,7 +9,7 @@ Cryptographic attestation for articles — an EIP-712 signature over the canonic
 | `@jterrazz/attestation`           | Node        | full surface: canonicalize, EIP-712 schema, create/sign/verify, serialize, audit               |
 | `@jterrazz/attestation/browser`   | any runtime | verify-only, pure ESM (noble-hashes + viem): `verifyFromUrl`, ENS helpers                      |
 | `@jterrazz/attestation/node`      | Node        | OpenTimestamps: `stampDigest`, `upgradeProof`, `verifyOts`; the wallet sign flows              |
-| `npx @jterrazz/attestation` (CLI) | Node        | `sign`, `verify`, `upgrade`; `attestation` once installed — [reference](docs/reference/cli.md) |
+| `npx @jterrazz/attestation` (CLI) | Node        | `sign`, `verify`, `upgrade`; `attestation` once installed ([reference](docs/reference/cli.md)) |
 
 ## In 30 seconds
 
@@ -31,7 +31,7 @@ const signed = await createAttestation(
 const json = stringify(signed); // what <article>.attestation.json holds
 
 const verdict = await verifyAttestation({ attestation: parse(json), content });
-console.log(verdict); // { ok: true, signerAddress: '0x…' }
+console.log(verdict); // { ok: true, signerAddress: '0x...' }
 ```
 
 A published article, from any runtime, a browser tab included:
@@ -47,10 +47,10 @@ The same from a terminal, with no install: `npx @jterrazz/attestation verify htt
 
 ## Flow
 
-1. **Sign** — canonicalize the article body, digest it (SHA-256), build the EIP-712 `AttestationMessage`, sign with the author key → `<article>.attestation.json`.
-2. **Stamp** — `stampDigest` submits the digest to OpenTimestamps calendars → `<article>.ots`.
-3. **Upgrade** — once anchored in a Bitcoin block, `upgradeProof` completes the proof.
-4. **Verify** — anywhere: signature (`verifyAttestation`), timestamp (`verifyOts`), or both from a URL in the browser (`verifyFromUrl`).
+1. **Sign**: canonicalize the article body, digest it (SHA-256), build the EIP-712 `AttestationMessage` and sign it with the author key, which writes `<article>.attestation.json`.
+2. **Stamp**: `stampDigest` submits the digest to the OpenTimestamps calendars, which answer `<article>.ots`.
+3. **Upgrade**: once anchored in a Bitcoin block, `upgradeProof` completes the proof.
+4. **Verify**, anywhere: the signature (`verifyAttestation`), the timestamp (`verifyOts`), or both from a URL in the browser (`verifyFromUrl`).
 
 ## Tests
 

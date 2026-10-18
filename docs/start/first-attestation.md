@@ -4,13 +4,13 @@ From an article on disk to a signature anyone can check and a Bitcoin date, with
 
 ## 1. Sign
 
-Name the article's file by its locale — `en.md` — and sign it:
+Name the article's file by its locale (`en.md`) and sign it:
 
 ```bash
 npx @jterrazz/attestation sign en.md --title "Hello" --slug hello
 ```
 
-The binary canonicalizes the file, refuses invisible or directional characters it finds, and opens your browser on a page served on 127.0.0.1: your wallet (`window.ethereum`) shows the typed data and signs it. The signature is checked against the content before anything is written, then the binary writes `en.attestation.json` beside the article and prints its attestation digest — keep it: it is the `--prior-attestation` of the next revision.
+The binary canonicalizes the file, refuses invisible or directional characters it finds, and opens your browser on a page served on 127.0.0.1: your wallet (`window.ethereum`) shows the typed data and signs it. The signature is checked against the content before anything is written, then the binary writes `en.attestation.json` beside the article and prints its attestation digest. Keep it: it is the `--prior-attestation` of the next revision.
 
 ## 2. Stamp
 
@@ -32,4 +32,4 @@ The proof is rewritten with its Bitcoin attestation, or left untouched while the
 npx @jterrazz/attestation verify en.md
 ```
 
-The signature is recovered offline, then the date is read from the block the proof names; a proof still pending its block passes. Publish `en.md`, `en.attestation.json`, `en.ots` and a `proof.json` naming them beside the article, and anyone verifies it from its URL — `attestation verify <url>`, or `verifyFromUrl` in a page.
+The signature is recovered offline, then the date is read from the block the proof names; a proof still pending its block passes. Publish `en.md`, `en.attestation.json`, `en.ots` and a `proof.json` naming them beside the article, and anyone verifies it from its URL, with `attestation verify <url>` or `verifyFromUrl` in a page.

@@ -1,4 +1,4 @@
-# Agent brief — `@jterrazz/attestation`
+# Agent brief: `@jterrazz/attestation`
 
 EIP-712 article attestation anchored to Bitcoin via OpenTimestamps: sign once, verify anywhere. This file **routes**; it does not restate what the manual says.
 
@@ -6,7 +6,7 @@ EIP-712 article attestation anchored to Bitcoin via OpenTimestamps: sign once, v
 
 The manual is `docs/`, mapped by [docs/README.md](docs/README.md). Read the page before the change; link to it, never copy it.
 
-| Working on…                                             | Read                                     |
+| Working on                                              | Read                                     |
 | ------------------------------------------------------- | ---------------------------------------- |
 | The entries, the folders, the browser boundary          | `docs/concepts/architecture.md`          |
 | Canonicalization, EIP-712, signing, OTS anchoring       | `docs/concepts/signing-and-anchoring.md` |
@@ -15,7 +15,7 @@ The manual is `docs/`, mapped by [docs/README.md](docs/README.md). Read the page
 | The release, and which number moves                     | `docs/guides/release.md`                 |
 | The `attestation` binary's commands and flags           | `docs/reference/cli.md`                  |
 
-`skills/jterrazz-attestation/` routes agents into this manual for the domain itself — it does not restate it either.
+`skills/jterrazz-attestation/` routes agents into this manual for the domain itself; it does not restate it either.
 
 ## Setup
 
