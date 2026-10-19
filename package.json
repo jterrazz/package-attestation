@@ -1,6 +1,6 @@
 {
     "name": "@jterrazz/attestation",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "description": "Cryptographic attestation for articles: an EIP-712 signature anchored to Bitcoin through OpenTimestamps.",
     "license": "MIT",
     "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
