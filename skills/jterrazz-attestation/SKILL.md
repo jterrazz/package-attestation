@@ -1,6 +1,6 @@
 ---
 name: jterrazz-attestation
-description: "Cryptographic article attestation via @jterrazz/attestation: an EIP-712 signature over canonicalized content, Bitcoin anchoring through OpenTimestamps, browser-safe verification. Use when signing or verifying article attestations, working with .attestation.json / .ots files, the attestation CLI (sign, verify, upgrade), canonicalization, content digests, or proof/verify pages."
+description: 'Cryptographic article attestation via @jterrazz/attestation: an EIP-712 signature over canonicalized content, Bitcoin anchoring through OpenTimestamps, browser-safe verification. Use when signing or verifying article attestations, working with .attestation.json / .ots files, the attestation CLI (sign, verify, upgrade), canonicalization, content digests, or proof/verify pages.'
 ---
 
 # @jterrazz/attestation: sign once, verify anywhere
