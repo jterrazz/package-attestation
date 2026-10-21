@@ -8,7 +8,7 @@ Nothing that reaches a consumer. `.github/workflows/validate.yaml` fires on ever
 
 ## What publishes
 
-`.github/workflows/release.yaml` fires on `release: created` and calls the shared `release-npm.yaml` workflow with npm provenance (`id-token: write`). That workflow validates again, then runs `make build` and `npm publish --access public --provenance`. So exactly one gesture publishes, and a human makes it: cutting a GitHub Release from a tag.
+`.github/workflows/release.yaml` fires on `release: created` and calls the shared `release-npm.yaml` workflow with npm provenance (`id-token: write`). That workflow validates again, then runs `make build` and `npm publish --access public --provenance`. So exactly one gesture publishes, and a human makes it: cutting a GitHub Release from a tag. Before the tag, `make rehearse` runs the gate on that commit as the runner will, on Linux ([A rehearsal on Linux](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/commands.md#a-rehearsal-on-linux)), and exits 0.
 
 In this repository's own history the version in `package.json` is bumped in the commit that closes the work being released (for example `2dc101e`, tagged `v0.2.0`), and the tag is what the release is cut from; there is no separate `chore(release)` commit convention here today.
 
