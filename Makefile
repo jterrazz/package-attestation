@@ -1,6 +1,6 @@
 .PHONY: install build lint fix test test-network mutation check
 
-node_modules/.install: package-lock.json $(wildcard .artifacts/packages/*.tgz)
+node_modules/.install: package-lock.json
 	npm ci
 	@touch node_modules/.install
 
