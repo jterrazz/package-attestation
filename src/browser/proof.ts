@@ -27,7 +27,7 @@ export type AuthorshipState =
 export type DateState =
     | {
           kind: 'failed';
-          error: 'digest-mismatch' | 'fetch' | 'invalid-proof';
+          error: 'digest-mismatch' | 'explorer-unreachable' | 'fetch' | 'invalid-proof';
           details?: string | undefined;
       }
     | { kind: 'fetching' }

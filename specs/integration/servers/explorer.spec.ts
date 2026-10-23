@@ -76,7 +76,7 @@ describe('explorer', () => {
         expect(result.error.text).toBe('');
     });
 
-    test('a block the explorer answers without its merkle root fails the proof', async () => {
+    test('a block the explorer answers without its merkle root leaves the proof undated, the explorer named', async () => {
         // Given - an explorer answering each block with its time alone
         const result = await integration
             .intercept(explorerAt('https://esplora.test', (_merkle, time) => ({ timestamp: time })))
@@ -88,9 +88,50 @@ describe('explorer', () => {
         // Then - the first block named, as the reason
         expect(result.value).toMatch({
             details:
-                "bitcoin verification failed: TypeError: The explorer's block 000000000000000000005846c42438750704d2221f5476a87ecb64b14594e142 carries no merkle_root and timestamp",
+                "The explorer's block 000000000000000000005846c42438750704d2221f5476a87ecb64b14594e142 carries no merkle_root and timestamp",
             ok: false,
-            reason: 'invalid-proof',
+            reason: 'explorer-unreachable',
+        });
+        expect(result.error.text).toBe('');
+    });
+
+    test('a lookup the explorer drops once is asked again', async () => {
+        // Given - an explorer that drops the first lookup of each block, then answers
+        const result = await integration
+            .intercept([
+                ...BLOCKS.map(([height]) => ({
+                    request: http.get(`https://esplora.test/block-height/${height}`),
+                    response: http.unreachable(),
+                    times: 1,
+                })),
+                ...explorerAt('https://esplora.test', headers).stubs,
+            ])
+            .call(async () => {
+                const verdict = await verifyOts(DIGEST, ANCHORED, {
+                    explorerUrl: 'https://esplora.test',
+                });
+                return verdict.ok ? verdict.bitcoinBlockTime.toISOString() : verdict;
+            });
+
+        // Then - the proof dated as if nothing had been dropped
+        expect(result.value).toMatch('2026-05-09T14:51:40.000Z');
+        expect(result.error.text).toBe('');
+    });
+
+    test('an explorer that never answers leaves the proof undated rather than invalid', async () => {
+        // Given - an explorer every lookup of which fails in transport
+        const result = await integration
+            .intercept(http.get(/esplora\.test/u), http.unreachable())
+            .call(
+                async () =>
+                    await verifyOts(DIGEST, ANCHORED, { explorerUrl: 'https://esplora.test' }),
+            );
+
+        // Then - the lookup that failed, named
+        expect(result.value).toMatch({
+            details: 'GET https://esplora.test/block-height/948625: TypeError: Network error',
+            ok: false,
+            reason: 'explorer-unreachable',
         });
         expect(result.error.text).toBe('');
     });

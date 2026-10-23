@@ -37,7 +37,7 @@ describe('calendars', () => {
             );
 
         // Then - the answer refused by its size
-        expect(result.error).toMatch(`${ASKED} answered more than 10000 bytes`);
+        expect(result.error).toMatch(`GET ${ASKED}: RangeError: answered more than 10000 bytes`);
     });
 
     test('a calendar answering bytes that are no timestamp is refused', async () => {

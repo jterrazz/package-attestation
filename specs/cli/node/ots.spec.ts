@@ -48,7 +48,7 @@ describe('ots', () => {
             Lite-client verification, assuming block hash-948655 is valid
             Lite-client verification, assuming block hash-948647 is valid
             anchored, a block that disagrees: {"details":"bitcoin verification failed: Digest does not match merkleroot","ok":false,"reason":"invalid-proof"}
-            anchored, the explorer down: {"details":"bitcoin verification failed: Error: connect ECONNREFUSED 127.0.0.1:{{port}}","ok":false,"reason":"invalid-proof"}
+            anchored, the explorer down: {"details":"GET http://127.0.0.1:{{port}}/block-height/948625: Error: connect ECONNREFUSED 127.0.0.1:{{port}}","ok":false,"reason":"explorer-unreachable"}
             upgrading an anchored proof: {"length":5162,"same":true,"upgraded":false}
             Ignoring attestation from calendar https://calendar.example.invalid: Calendar not in whitelist
             upgrading against a calendar off the whitelist: {"same":true,"upgraded":false}

@@ -2,7 +2,7 @@ import { hexToBytes } from '@noble/hashes/utils.js';
 import { Buffer } from 'node:buffer';
 
 import { messageOf } from '../primitives/error-message.js';
-import { blockAt, PUBLIC_ESPLORA } from './esplora.js';
+import { blockAt, ExplorerUnreachableError, PUBLIC_ESPLORA } from './esplora.js';
 import { proofFileOf } from './proof-file.js';
 import { attestationsOf } from './timestamp.js';
 import type { Attested, Timestamp } from './timestamp.js';
@@ -20,7 +20,7 @@ export type OtsVerifyOk = {
 
 export type OtsVerifyFail = {
     ok: false;
-    reason: 'digest-mismatch' | 'invalid-proof' | 'pending-bitcoin';
+    reason: 'digest-mismatch' | 'explorer-unreachable' | 'invalid-proof' | 'pending-bitcoin';
     details?: string;
 };
 
@@ -53,25 +53,34 @@ export async function verifyOts(
         }
         return { bitcoinBlockTime: new Date(time * 1000), ok: true };
     } catch (error) {
-        return { details: messageOf(error), ok: false, reason: 'invalid-proof' };
+        const reason =
+            error instanceof ExplorerUnreachableError ? 'explorer-unreachable' : 'invalid-proof';
+        return { details: messageOf(error), ok: false, reason };
     }
 }
 
-// invariant: every Bitcoin attestation is checked, in the order of the tree, before the first that fails is reported, so a proof is never dated by a block when another block refutes it.
+// invariant: every Bitcoin attestation is checked, in the order of the tree, before a verdict is given: a block that refutes the proof fails it, and a block the explorer could not show leaves it undated, so a proof is never dated by a block when another block refutes it or might be earlier.
 async function bitcoinTimeOf(root: Timestamp, explorer: string): Promise<number | undefined> {
     const times: number[] = [];
-    const failures: string[] = [];
+    const refuted: string[] = [];
+    const unreachable: string[] = [];
     for (const attested of attestationsOf(root)) {
         if (attested.attestation.kind !== 'bitcoin') {
             continue;
         }
         await blockTimeOf(attested, attested.attestation.height, explorer).then(
             (time) => times.push(time),
-            (error: unknown) => failures.push(messageOf(error)),
+            (error: unknown) =>
+                (error instanceof ExplorerUnreachableError ? unreachable : refuted).push(
+                    messageOf(error),
+                ),
         );
     }
-    if (failures.length > 0) {
-        throw new Error(`bitcoin verification failed: ${failures[0]}`);
+    if (refuted.length > 0) {
+        throw new Error(`bitcoin verification failed: ${refuted[0]}`);
+    }
+    if (unreachable.length > 0) {
+        throw new ExplorerUnreachableError(unreachable[0]);
     }
     return times.length === 0 ? undefined : Math.min(...times);
 }

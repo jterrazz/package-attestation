@@ -29,6 +29,8 @@ describe('from-url', () => {
               asked: /articles/hello/proof.json /articles/hello/en.md /articles/hello/en.attestation.json /verify-ots.json
             a proof refused: {"authorship":{"kind":"verified","signedAt":"2026-05-09T00:00:00.000Z","signerAddress":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"},"date":{"details":"merkle root differs","error":"invalid-proof","kind":"failed"}}
               asked: /articles/hello/proof.json /articles/hello/en.md /articles/hello/en.attestation.json /verify-ots.json
+            an explorer the verifier could not reach: {"authorship":{"kind":"verified","signedAt":"2026-05-09T00:00:00.000Z","signerAddress":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"},"date":{"details":"GET https://blockstream.info/api/block-height/1: connect ETIMEDOUT","error":"explorer-unreachable","kind":"failed"}}
+              asked: /articles/hello/proof.json /articles/hello/en.md /articles/hello/en.attestation.json /verify-ots.json
             a verifier down: {"authorship":{"kind":"verified","signedAt":"2026-05-09T00:00:00.000Z","signerAddress":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"},"date":{"details":"GET https://example.com/verify-ots.json: HTTP 404","error":"fetch","kind":"failed"}}
               asked: /articles/hello/proof.json /articles/hello/en.md /articles/hello/en.attestation.json /verify-ots.json
             a verifier answering no verdict: {"authorship":{"kind":"verified","signedAt":"2026-05-09T00:00:00.000Z","signerAddress":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"},"date":{"details":"GET https://example.com/verify-ots.json: not an OpenTimestamps verdict","error":"fetch","kind":"failed"}}

@@ -43,6 +43,7 @@ await report('an empty verifier', article$({ otsVerifier: '' }));
 await report('verified on Bitcoin', article$({ otsVerifier: '/verify-ots.json' }, { '/verify-ots.json': { bitcoinTime: '2026-05-09T14:51:40.000Z', ok: true } }));
 await report('pending its block', article$({ otsVerifier: '/verify-ots.json' }, { '/verify-ots.json': { ok: false, reason: 'pending-bitcoin' } }));
 await report('a proof refused', article$({ otsVerifier: '/verify-ots.json' }, { '/verify-ots.json': { details: 'merkle root differs', ok: false, reason: 'invalid-proof' } }));
+await report('an explorer the verifier could not reach', article$({ otsVerifier: '/verify-ots.json' }, { '/verify-ots.json': { details: 'GET https://blockstream.info/api/block-height/1: connect ETIMEDOUT', ok: false, reason: 'explorer-unreachable' } }));
 await report('a verifier down', article$({ otsVerifier: '/verify-ots.json' }));
 await report('a verifier answering no verdict', article$({ otsVerifier: '/verify-ots.json' }, { '/verify-ots.json': { ok: 'yes' } }));
 await report('a digest the verifier refuses', article$({ otsVerifier: '/verify-ots.json' }, { '/verify-ots.json': { ok: false, reason: 'digest-mismatch' } }));

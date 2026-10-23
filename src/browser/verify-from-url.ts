@@ -21,13 +21,14 @@ export type VerifyFromUrlReport = {
 type OtsVerdict =
     | {
           ok: false;
-          reason: 'digest-mismatch' | 'invalid-proof' | 'pending-bitcoin';
+          reason: 'digest-mismatch' | 'explorer-unreachable' | 'invalid-proof' | 'pending-bitcoin';
           details?: string;
       }
     | { ok: true; bitcoinTime: string };
 
 const REASONS: ReadonlySet<unknown> = new Set([
     'digest-mismatch',
+    'explorer-unreachable',
     'invalid-proof',
     'pending-bitcoin',
 ]);
