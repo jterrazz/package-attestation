@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { stampDigest, upgradeProof, verifyOts } from '@jterrazz/attestation/node';
-import OpenTimestamps from 'javascript-opentimestamps';
 
 import { print } from './wallet.mjs';
 
@@ -34,9 +33,8 @@ const explorer = createServer((request, response) => {
 await new Promise((listening) => explorer.listen(0, '127.0.0.1', listening));
 const explorerUrl = `http://127.0.0.1:${explorer.address().port}`;
 
-const pending = OpenTimestamps.DetachedTimestampFile.fromHash(new OpenTimestamps.Ops.OpSHA256(), digest);
-pending.timestamp.attestations.push(new OpenTimestamps.Notary.PendingAttestation('https://calendar.example.invalid'));
-const calendarOnly = new Uint8Array(pending.serializeToBytes());
+// The SigNews digest, pending on a calendar off the whitelist: written by javascript-opentimestamps 0.4.5, the client this package carried until 0.3.1.
+const calendarOnly = new Uint8Array(readFileSync('pending.ots'));
 
 for (const length of [0, 31, 33, 32]) {
     await stampDigest(new Uint8Array(length)).then(

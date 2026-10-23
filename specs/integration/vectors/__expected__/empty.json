@@ -1,0 +1,13 @@
+{
+    "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hash": "sha256",
+    "roundTrip": true,
+    "upgrade": {
+        "same": true,
+        "upgraded": false
+    },
+    "verdict": {
+        "bitcoinBlockTime": "2011-06-08T16:15:34.000Z",
+        "ok": true
+    }
+}

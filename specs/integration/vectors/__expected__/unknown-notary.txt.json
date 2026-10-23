@@ -1,0 +1,13 @@
+{
+    "digest": "dcc21d1d1f42a436a2a07fc915dec04db41b83c898845948c3d664b6660f4f91",
+    "hash": "sha256",
+    "roundTrip": true,
+    "upgrade": {
+        "same": true,
+        "upgraded": false
+    },
+    "verdict": {
+        "ok": false,
+        "reason": "pending-bitcoin"
+    }
+}

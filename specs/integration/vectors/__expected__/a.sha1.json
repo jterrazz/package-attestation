@@ -1,0 +1,14 @@
+{
+    "digest": "f92d74e3874587aaf443d1db961d4e26dde13e9c",
+    "hash": "sha1",
+    "roundTrip": true,
+    "upgrade": {
+        "same": true,
+        "upgraded": false
+    },
+    "verdict": {
+        "details": "Expected 32-byte digest, got 20",
+        "ok": false,
+        "reason": "digest-mismatch"
+    }
+}

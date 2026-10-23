@@ -18,13 +18,13 @@ Nothing declares the build: `typescript build` reads the manifest (each `exports
 | `src/primitives/`  | `canonicalize`, `audit`, `sha256Hex`, the EIP-712 schema, and the two helpers every reader of JSON shares (`hasShape`, `messageOf`), pure and runtime-agnostic |
 | `src/attestation/` | the record (`record.ts`), building and signing it (`create.ts`), writing and reading it (`serialize.ts`), verifying it (`verify.ts`)                           |
 | `src/browser/`     | `verifyFromUrl`, the `proof.json` manifest a published article serves, ENS display names; no Node module allowed                                               |
-| `src/ots/`         | OpenTimestamps: stamp, upgrade, verify, and the typings of the untyped library; Node-only                                                                      |
+| `src/ots/`         | OpenTimestamps: the `.ots` format, the calendars, stamp, upgrade, verify; Node-only                                                                            |
 | `src/eth/`         | the wallet's sign flows: a one-shot server on 127.0.0.1, the pages it serves, the EIP-712 v4 payload a browser wallet signs                                    |
 | `src/cli/`         | the `attestation` binary: dispatch, `sign`, `verify`, `upgrade`, terminal output                                                                               |
 
 ## The boundary the browser entry keeps
 
-`src/index.browser.ts` stays importable from any modern JavaScript runtime, a browser tab included. It re-exports only from `src/primitives/`, `src/attestation/` and `src/browser/`, and none of those may reach `fs`, `node:http`, `node:crypto` or the OpenTimestamps library. No lint rule holds it today: the spec `specs/cli/node/subpaths.spec.ts` pins every name each entry publishes, and a review of any import added under `src/browser/` holds the rest.
+`src/index.browser.ts` stays importable from any modern JavaScript runtime, a browser tab included. It re-exports only from `src/primitives/`, `src/attestation/` and `src/browser/`, and none of those may reach `fs`, `node:http`, `node:crypto` or `src/ots/`. No lint rule holds it today: the spec `specs/cli/node/subpaths.spec.ts` pins every name each entry publishes, and a review of any import added under `src/browser/` holds the rest.
 
 `src/index.node.ts` is the opposite promise: it exists to reach the Node-only modules, so a bundler resolving `@jterrazz/attestation/browser` never touches them. The CLI is Node too, and reads a published article through the browser folder's manifest helpers, which run anywhere.
 

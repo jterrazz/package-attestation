@@ -1,0 +1,14 @@
+{
+    "digest": "7e3717bbe020f53cdc6c40154a1a8e55bddc13a28c8bb3c82e9ee64b81b44872",
+    "hash": "sha256",
+    "roundTrip": true,
+    "upgrade": {
+        "same": true,
+        "upgraded": false
+    },
+    "verdict": {
+        "details": "bitcoin verification failed: Digest does not match merkleroot",
+        "ok": false,
+        "reason": "invalid-proof"
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "digest": "0423ced4914bc5e47aeda314b5993b7bd796fe00",
+    "hash": "ripemd160",
+    "roundTrip": true,
+    "upgrade": {
+        "same": true,
+        "upgraded": false
+    },
+    "verdict": {
+        "details": "Expected 32-byte digest, got 20",
+        "ok": false,
+        "reason": "digest-mismatch"
+    }
+}

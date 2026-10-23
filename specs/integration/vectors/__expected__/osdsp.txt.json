@@ -1,0 +1,13 @@
+{
+    "digest": "397a00836979837319bdd350aa93bcc2798e94e08ab00f32f355e5ebe7837c2b",
+    "hash": "sha256",
+    "roundTrip": true,
+    "upgrade": {
+        "same": true,
+        "upgraded": false
+    },
+    "verdict": {
+        "bitcoinBlockTime": "2018-05-19T08:50:49.000Z",
+        "ok": true
+    }
+}

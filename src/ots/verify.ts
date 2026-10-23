@@ -1,12 +1,15 @@
-import OpenTimestamps from 'javascript-opentimestamps';
+import { hexToBytes } from '@noble/hashes/utils.js';
+import { Buffer } from 'node:buffer';
 
 import { messageOf } from '../primitives/error-message.js';
+import { blockAt, PUBLIC_ESPLORA } from './esplora.js';
 import { proofFileOf } from './proof-file.js';
-
-const { DetachedTimestampFile, Ops } = OpenTimestamps;
+import { attestationsOf } from './timestamp.js';
+import type { Attested, Timestamp } from './timestamp.js';
+import { upgradeTimestamp } from './upgrade.js';
 
 export type OtsVerifyOptions = {
-    /** An Esplora-compatible explorer the Bitcoin block lookup asks instead of the library's public default: a node of your own, or a double. */
+    /** An Esplora-compatible explorer the Bitcoin block lookup asks instead of the public default: a node of your own, or a double. */
     explorerUrl?: string | undefined;
 };
 
@@ -38,29 +41,49 @@ export async function verifyOts(
     }
 
     try {
-        const stamped = proofFileOf(otsBytes);
-        const original = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), digest);
-        const { bitcoin } = await OpenTimestamps.verify(
-            stamped,
-            original,
-            explorerOptions(options),
-        );
-        if (bitcoin === undefined) {
+        const { timestamp } = proofFileOf(otsBytes);
+        if (!Buffer.from(timestamp.message).equals(digest)) {
+            throw new Error('File does not match original!');
+        }
+        await upgradeTimestamp(timestamp);
+        const explorer = options.explorerUrl ?? '';
+        const time = await bitcoinTimeOf(timestamp, explorer === '' ? PUBLIC_ESPLORA : explorer);
+        if (time === undefined) {
             return { ok: false, reason: 'pending-bitcoin' };
         }
-        return { bitcoinBlockTime: new Date(bitcoin.timestamp * 1000), ok: true };
+        return { bitcoinBlockTime: new Date(time * 1000), ok: true };
     } catch (error) {
         return { details: messageOf(error), ok: false, reason: 'invalid-proof' };
     }
 }
 
-// Stryker disable StringLiteral,ConditionalExpression,BlockStatement: without an explorer the library asks a local Bitcoin node, then the public explorer, both on the network, which no offline spec reaches; the two paths differ only there
-function explorerOptions({ explorerUrl = '' }: OtsVerifyOptions): object {
-    if (explorerUrl === '') {
-        return {};
+// invariant: every Bitcoin attestation is checked, in the order of the tree, before the first that fails is reported, so a proof is never dated by a block when another block refutes it.
+async function bitcoinTimeOf(root: Timestamp, explorer: string): Promise<number | undefined> {
+    const times: number[] = [];
+    const failures: string[] = [];
+    for (const attested of attestationsOf(root)) {
+        if (attested.attestation.kind !== 'bitcoin') {
+            continue;
+        }
+        await blockTimeOf(attested, attested.attestation.height, explorer).then(
+            (time) => times.push(time),
+            (error: unknown) => failures.push(messageOf(error)),
+        );
     }
-    // Stryker restore all
-    // outside: the library reads `ignoreBitcoinNode` (its docs say `ignore_bitcoin_node`), and its explorer timeout, documented in seconds, reaches its HTTP client as milliseconds (10 s).
-    // Stryker disable next-line BooleanLiteral: the library's local-node lookup is dead today (its readBitcoinConf reads array indices, never a file), so the flag changes nothing yet; it keeps a fixed library from asking a local node before the explorer named
-    return { esplora: { timeout: 10_000, url: explorerUrl }, ignoreBitcoinNode: true };
+    if (failures.length > 0) {
+        throw new Error(`bitcoin verification failed: ${failures[0]}`);
+    }
+    return times.length === 0 ? undefined : Math.min(...times);
+}
+
+async function blockTimeOf(
+    { message }: Attested,
+    height: number,
+    explorer: string,
+): Promise<number> {
+    const block = await blockAt(explorer, height);
+    if (!Buffer.from(message.toReversed()).equals(hexToBytes(block.merkleRoot))) {
+        throw new Error('Digest does not match merkleroot');
+    }
+    return block.time;
 }

@@ -28,6 +28,11 @@ specs/integration/
 ├── schema/                        # the EIP-712 type table and the digest it hashes to
 ├── attestation/                   # one frozen article: its signature, its document, its verdict
 ├── storage/                       # five articles written, read back and verified
+├── vectors/                       # the upstream OpenTimestamps vectors, against the reference client's verdicts
+├── format/                        # proofs written by hand: what reads back unchanged, what is refused
+├── stamp/                         # a digest stamped with the aggregators' recorded answers
+├── upgrade/                       # the SigNews proof upgraded with the calendars' recorded answers, the whitelist
+├── servers/                       # what the client sends a calendar and an explorer, and what it refuses of them
 └── network/                       # the live calendars, collected only under ATTEST_E2E_NETWORK
 ```
 
@@ -45,10 +50,10 @@ Every spec here links `@jterrazz/attestation` packed (`npm pack` over the build,
 - **The wallet.** `sign` opens the default browser on its loopback page. The spec puts a stand-in first on `PATH` (the `HEADLESS` environment `cli.specification.ts` exports) (`attestation/__fixtures__/wallet/bin/open`, a node script that reads the page, signs its typed data with Hardhat's account 0 and posts the signature back) and leaves `/usr/bin`, where macOS keeps `open`, off `PATH`; on Linux the `open` package's bundled `xdg-open` hands the URL to `$BROWSER`, which the spec points at the same stand-in. The attestation it writes is the frozen one, byte for byte.
 - **The default browser.** The two sign-flow consumers name their own opener, so the default browser is never theirs to reach. Their specs still run under the same headless environment (`HEADLESS`, in `cli.specification.ts`) with a stand-in at `node/__fixtures__/consumer/bin/open` that records the URL it is asked to open and refuses, and each asserts it recorded nothing: a change that let a named opener fall through to the real one fails there, and opens no window.
 - **The Bitcoin explorer.** `__fixtures__/signews/` is a published article (jterrazz.com's "Mapping the noise"), its attestation and its real anchored proof. An Esplora double (in `ots.mjs`, and in `verify.spec.ts` for the binary) answers its three blocks with the merkle roots the proof computes, so the date is verified offline: 2026-05-09T14:51:40Z.
-- **The calendars.** A calendar-only proof names `https://calendar.example.invalid`, a calendar off the library's whitelist: verifying or upgrading it asks nothing of the network and reads `pending-bitcoin`.
+- **The calendars.** A calendar-only proof names `https://calendar.example.invalid`, a calendar off the whitelist: verifying or upgrading it asks nothing of the network and reads `pending-bitcoin`.
 - **The article sites.** `from-url.mjs` hands `verifyFromUrl` a fetch double; `verify.spec.ts` serves the SigNews article on 127.0.0.1 for the binary.
 
-`resolveEnsName` and `stampDigest`'s submission reach the network by design: the first is specified with the global fetch replaced (every attempt refused, the answer `null`), the second only by `make test-network`.
+`resolveEnsName` and the calendars reach the network by design. The first is specified with the global fetch replaced (every attempt refused, the answer `null`). The calendars answer bytes, which a stub cannot serve: `stamp/` and `upgrade/` hand `stampWith` and `upgradeTimestamp` the answers the real calendars gave on 2026-10-23, `servers/` stubs the requests themselves, and only `make test-network` submits to the live calendars and upgrades the SigNews proof on them.
 
 ## The mutants no test kills
 
