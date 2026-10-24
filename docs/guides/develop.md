@@ -11,7 +11,7 @@ make install       # npm ci, once per lockfile
 make build         # typescript build into dist/, from the manifest
 make lint          # build, then typescript check: every quality gate
 make fix           # typescript fix: the fixers, and the derived files
-make test          # build, then vitest --run (offline)
+make test          # build, then typescript test over vitest --run (offline)
 make test-network  # + the live OpenTimestamps calendars
 make mutation      # typescript mutation: zero survivors over the change
 make check         # lint, test, mutation: what CI runs

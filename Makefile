@@ -18,7 +18,7 @@ fix: node_modules/.install
 
 # invariant: the specs install the tarball npm pack writes from dist/.
 test: build
-	npm test
+	npx typescript test
 
 # outside: reaches the live OpenTimestamps calendars, so `check` never calls it.
 test-network: build

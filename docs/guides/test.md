@@ -3,7 +3,7 @@
 What proves a change here, where a new test goes, and what each double stands for.
 
 ```bash
-make test          # build, then the unit, integration and cli projects, offline
+make test          # build, then typescript test: the unit, integration and cli projects, offline, none on a proven tree
 make test-network  # + specs/integration/network/, the live OpenTimestamps calendars
 make mutation      # the mutants of the change, against the whole suite
 ```
