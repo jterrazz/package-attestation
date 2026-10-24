@@ -273,11 +273,9 @@ describe('verify', () => {
             .fixture(directory('./__fixtures__/article/'))
             .exec('node_modules/.bin/attestation verify .');
 
-        // Then - the system's error, on stderr
+        // Then - the system's error, named by its code on stderr, since the message after it varies across Node versions
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
-            Error: EISDIR: illegal operation on a directory, read
-        `);
+        expect(result.stderr.text).toContain('Error: EISDIR: illegal operation on a directory');
     });
 
     test.each([
