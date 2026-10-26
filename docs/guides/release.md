@@ -4,7 +4,7 @@ This repository ships one thing: the npm package `@jterrazz/attestation`, publis
 
 ## What a merge to `main` does
 
-Nothing that reaches a consumer. `.github/workflows/validate.yaml` fires on every push and pull request to `main` and calls the shared `jterrazz-actions` `validate.yaml` workflow, which runs the build, the lint, the tests and the mutation run. A green `main` is a publishable tree, not a published one: merging this migration, or any other change, deploys nothing and publishes nothing.
+Nothing that reaches a consumer. `.github/workflows/validate.yaml` fires on every push and pull request to `main` and calls the shared `studio-actions` `validate.yaml` workflow, which runs the build, the lint, the tests and the mutation run. A green `main` is a publishable tree, not a published one: merging this migration, or any other change, deploys nothing and publishes nothing.
 
 ## What publishes
 

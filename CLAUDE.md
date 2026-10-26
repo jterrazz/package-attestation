@@ -15,7 +15,7 @@ The manual is `docs/`, mapped by [docs/README.md](docs/README.md). Read the page
 | The release, and which number moves                     | `docs/guides/release.md`                 |
 | The `attestation` binary's commands and flags           | `docs/reference/cli.md`                  |
 
-`skills/jterrazz-attestation/` routes agents into this manual for the domain itself; it does not restate it either.
+`skills/studio-attestation/` routes agents into this manual for the domain itself; it does not restate it either.
 
 ## Setup
 

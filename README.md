@@ -60,6 +60,6 @@ Reference consumer: [`jterrazz-web`](https://github.com/jterrazz/jterrazz-web) (
 
 ## Documentation
 
-The manual is [`docs/`](docs/README.md): the architecture and what an attestation proves, how the package is developed, tested and released, and the CLI's reference. For agents: the [`skills/jterrazz-attestation`](skills/jterrazz-attestation/SKILL.md) skill.
+The manual is [`docs/`](docs/README.md): the architecture and what an attestation proves, how the package is developed, tested and released, and the CLI's reference. For agents: the [`skills/studio-attestation`](skills/studio-attestation/SKILL.md) skill.
 
 MIT © [Jean-Baptiste Terrazzoni](https://github.com/jterrazz)

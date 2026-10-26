@@ -4,7 +4,7 @@ How a change to this package is made: the declaration, the gestures, where a new
 
 ## The declaration and the gestures
 
-`jterrazz.config.ts` says what the repository is (a `library` on `node`, held to `@jterrazz/test`'s preset), and every tool's config is derived from it: `oxlint.config.ts`, `oxfmt.config.ts`, `vitest.config.ts` and `tsconfig.json` are each the one line `typescript fix` writes, and the build, knip and the mutation run keep no config at all. Its one exception, with its reason, is the integration project's exclusion of `specs/integration/network/` unless `ATTEST_E2E_NETWORK` is set.
+`studio.config.ts` says what the repository is (a `library` on `node`, held to `@jterrazz/test`'s preset), and every tool's config is derived from it: `oxlint.config.ts`, `oxfmt.config.ts`, `vitest.config.ts` and `tsconfig.json` are each the one line `typescript fix` writes, and the build, knip and the mutation run keep no config at all. Its one exception, with its reason, is the integration project's exclusion of `specs/integration/network/` unless `ATTEST_E2E_NETWORK` is set.
 
 ```bash
 make install       # npm ci, once per lockfile
