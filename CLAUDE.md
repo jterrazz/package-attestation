@@ -36,5 +36,3 @@ make install
 | What CI runs                             | `make check`        |
 
 No test may open a window: every spec that serves a sign page runs with a stand-in for the browser first on `PATH`, and the real opener is handed over in `src/eth/browser.ts` alone ([Test](docs/guides/test.md)).
-
-`CLAUDE.md` at the root is a symlink to this file: one brief, two names, no second copy.
